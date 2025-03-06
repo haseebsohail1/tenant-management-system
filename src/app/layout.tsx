@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
 import { Alexandria } from "next/font/google";
 import "./globals.css";
-import { Toaster } from 'react-hot-toast';
-import { SessionProvider } from 'next-auth/react';
+import { Toaster } from "react-hot-toast";
+import { SessionProvider } from "next-auth/react";
 import { ReactNode, useState } from "react";
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
 
-const alexandria = Alexandria({ subsets: ['latin'] });
+const alexandria = Alexandria({ subsets: ["latin"] });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const pathname: any = usePathname(); // Get current route
+  const pathname: any = usePathname();
 
   return (
     <html>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Auth Integrate</title>
+        <title>TMS</title>
       </head>
       <body className={`${alexandria.className} bg-white text-black flex`}>
         <Toaster
@@ -25,25 +25,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#333',
-              color: '#fff',
+              background: "#333",
+              color: "#fff",
             },
           }}
         />
         <SessionProvider>
-          {/* {showLayout ? (
-            <div className="flex w-full">
-              <div className="main-content flex">
-                <></>
-              </div> */}
-              <main className={`content flex-1 overflow-y-auto w-full bg-black h-screen overflow-auto`}>
-                {children}
-              </main>
-            {/* </div>
-          ) : <main className={`content flex-1 overflow-y-auto w-full bg-black`}>
-            <></>
+          <main
+            className={`content flex-1 overflow-y-auto w-full bg-gray-900 h-screen overflow-auto`}
+          >
             {children}
-          </main>} */}
+          </main>
         </SessionProvider>
       </body>
     </html>

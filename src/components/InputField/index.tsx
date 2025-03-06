@@ -3,13 +3,24 @@ import Image from "next/image";
 
 interface InputFieldProps {
   label: string;
-  type?: "text" | "password" | "email" | "search" | "number" | "textarea" | "tel" | "url" | "date" | "time" | "datetime-local";
+  type?:
+    | "text"
+    | "password"
+    | "email"
+    | "search"
+    | "number"
+    | "textarea"
+    | "tel"
+    | "url"
+    | "date"
+    | "time"
+    | "datetime-local";
   name: string;
   value: any;
   placeholder: string;
   required?: boolean;
   disabled?: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
 }
 
@@ -32,7 +43,7 @@ const InputField: React.FC<InputFieldProps> = ({
 
   return (
     <div className="mt-2">
-      <label className="block text-base font-medium" htmlFor={name}>
+      <label className="block font-mediumn text-white mb-1" htmlFor={name}>
         {label}
         {required && <span className="text-red-500">&nbsp;*</span>}
       </label>
@@ -44,13 +55,19 @@ const InputField: React.FC<InputFieldProps> = ({
             value={value}
             required={required}
             readOnly={disabled}
-            onChange={onChange}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              onChange(e as any)
+            }
             placeholder={placeholder}
-            className={`w-full px-4 h-28 text-sm border border-black-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-black-500 focus:border-transparent ${disabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : ""} ${className}`}
+            className={`w-full px-4 h-28 bg-gray-700 text-white text-sm rounded-md p-3 w-full focus:outline-none focus:none ${
+              disabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : ""
+            } ${className}`}
           />
         ) : (
           <input
-            type={type === "password" ? (showPassword ? "text" : "password") : type}
+            type={
+              type === "password" ? (showPassword ? "text" : "password") : type
+            }
             id={name}
             name={name}
             value={value}
@@ -58,7 +75,9 @@ const InputField: React.FC<InputFieldProps> = ({
             readOnly={disabled}
             onChange={onChange}
             placeholder={placeholder}
-            className={`w-full px-4 py-[.8rem] text-sm border border-black-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-black-500 focus:border-transparent ${disabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : ""} ${className}`}
+            className={`bg-gray-700 text-white text-sm rounded-md p-3 w-full focus:outline-none focus:none  ${
+              disabled ? "bg-gray-800 text-gray-400 cursor-not-allowed" : ""
+            } ${className}`}
           />
         )}
 
