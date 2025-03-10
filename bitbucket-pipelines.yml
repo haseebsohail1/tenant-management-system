@@ -1,15 +1,16 @@
 image: atlassian/default-image:3  # Or any other image that has Git
 
 pipelines:
-  default:
-    - step:
-        name: Mirror to GitHub
-        script:
-          # 1. Configure GitHub remote using your personal access token
-          - git remote add github https://x-token-auth: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@github.com/haseebsohail1/tenant-management-system.git
-          
-          # 2. Push all branches
-          - git push github --all
-          
-          # 3. Push all tags
-          - git push github --tags
+  branches:
+    main:
+      - step:
+          name: Mirror to GitHub
+          script:
+            # 1. Configure GitHub remote using your personal access token
+            - git remote add github https://x-token-auth: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@github.com/haseebsohail1/tenant-management-system.git
+
+            # 2. Push all branches
+            - git push github --all
+
+            # 3. Push all tags
+            - git push github --tags
