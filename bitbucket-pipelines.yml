@@ -6,7 +6,7 @@ pipelines:
         name: Mirror to GitHub
         script:
           # 1. Configure GitHub remote using your personal access token
-          - git remote add github https://x-token-auth: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@github.com/haseebsohail1/tenant-management-system.git
+          - git remote add github https://x-token-auth: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@github.com/haseebsohail1/tenant-management-system.git
           
           # 2. Push all branches
           - git push github --all
