@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../../components/Button/Button";
-import InputField from "@/components/InputField"; // Assuming InputField is in this path
+import InputField from "@/components/InputField";
+import { ChangePassword } from "@/components/ApiComponent"; // Import your API function
+import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 interface SettingProps {}
 
@@ -11,25 +14,78 @@ interface PasswordData {
 }
 
 const Settings: React.FC<SettingProps> = () => {
+  const { data: session, status } = useSession();
   const [passwordData, setPasswordData] = useState<PasswordData>({
     currentpassword: "",
     newpassword: "",
     confirmpassword: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!session?.user?.id || !session?.token) {
+      console.warn(
+        "User ID or token not available. Ensure user is authenticated."
+      );
+    }
+  }, [session?.user?.id, session?.token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target; // Use name instead of id
+    const { name, value } = e.target;
     setPasswordData((prevData) => ({
       ...prevData,
-      [name]: value, // Use name to update the state
+      [name]: value,
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("Updating password with data:", passwordData);
+  const handleSubmit = async () => {
+    if (!session?.user?.id || !session?.token) {
+      toast.error("User ID or token not available. Please log in.");
+      return;
+    }
+
+    if (passwordData.newpassword !== passwordData.confirmpassword) {
+      toast.error("New password and confirm password do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await ChangePassword(
+        session?.user?.id,
+        passwordData.currentpassword,
+        passwordData.newpassword,
+        passwordData.confirmpassword,
+        session?.token
+      );
+
+      if (response.status === 200) {
+        toast.success("Password updated successfully!");
+        setPasswordData({
+          currentpassword: "",
+          newpassword: "",
+          confirmpassword: "",
+        });
+      } else {
+        toast.error(
+          `Password update failed: ${response.data?.message || "Unknown error"}`
+        );
+      }
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      toast.error(
+        `Password update failed: ${
+          error.response?.data?.message || error.message || "Unknown error"
+        }`
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
   const handleDeleteAccount = () => {
     console.warn("Delete account functionality not implemented!");
+    toast.error("Delete account functionality not implemented!");
   };
 
   return (
@@ -48,7 +104,7 @@ const Settings: React.FC<SettingProps> = () => {
           <InputField
             label="Current Password"
             type="password"
-            name="currentpassword" // Use the name attribute for easier handling
+            name="currentpassword"
             placeholder="Current Password"
             value={passwordData.currentpassword}
             onChange={handleChange}
@@ -59,7 +115,7 @@ const Settings: React.FC<SettingProps> = () => {
           <InputField
             label="New Password"
             type="password"
-            name="newpassword" // Use the name attribute for easier handling
+            name="newpassword"
             placeholder="New Password"
             value={passwordData.newpassword}
             onChange={handleChange}
@@ -70,7 +126,7 @@ const Settings: React.FC<SettingProps> = () => {
           <InputField
             label="Confirm Password"
             type="password"
-            name="confirmpassword" // Use the name attribute for easier handling
+            name="confirmpassword"
             placeholder="Confirm Password"
             value={passwordData.confirmpassword}
             onChange={handleChange}
@@ -81,8 +137,9 @@ const Settings: React.FC<SettingProps> = () => {
             <Button
               className="bg-indigo-800 text-white py-2 px-4 rounded-md"
               onClick={handleSubmit}
+              disabled={loading}
             >
-              Change Password
+              {loading ? "Updating..." : "Change Password"}
             </Button>
           </div>
         </div>

@@ -8,10 +8,10 @@ interface User {
 
 interface UsersTableProps {
   users: User[];
-  onAdd: () => void;
-  onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
-  onAddTitle: string;
+  onAdd?: () => void;
+  onEdit?: (user: User) => void;
+  onDelete?: (user: User) => void;
+  onAddTitle?: string;
   title: string;
   description: string;
   columnOrder: string[];
@@ -19,7 +19,7 @@ interface UsersTableProps {
   itemsPerPage: number;
 }
 
-const TableList: React.FC<UsersTableProps> = ({
+const TableList: React.FC<UsersTableProps & { loading?: boolean }> = ({
   users,
   onEdit,
   onDelete,
@@ -30,6 +30,7 @@ const TableList: React.FC<UsersTableProps> = ({
   columnOrder,
   columnTitles,
   itemsPerPage,
+  loading,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +53,12 @@ const TableList: React.FC<UsersTableProps> = ({
 
     if (filterColumn && filterValue) {
       result = result.filter((user) => {
-        return user[filterColumn]?.toLowerCase() === filterValue.toLowerCase();
+        if (filterColumn) {
+          return (
+            user[filterColumn]?.toLowerCase() === filterValue.toLowerCase()
+          );
+        }
+        return true;
       });
     }
 
@@ -75,6 +81,9 @@ const TableList: React.FC<UsersTableProps> = ({
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
+    if (!e.target.value) {
+      setCurrentPage(1);
+    }
   };
 
   const handleFilterColumnChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -83,10 +92,24 @@ const TableList: React.FC<UsersTableProps> = ({
     setCurrentPage(1);
   };
 
-  const handleFilterValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFilterValueChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setFilterValue(e.target.value);
     setCurrentPage(1);
   };
+
+  const allowedColumnOrder = [columnOrder[1], columnOrder[2]];
+
+  const filterColumnOptions = useMemo(() => {
+    if (!filterColumn) return [];
+    const uniqueValues = new Set<string>();
+    users.forEach((user) => {
+      const value = user[filterColumn];
+      if (value) {
+        uniqueValues.add(value.toLowerCase());
+      }
+    });
+    return Array.from(uniqueValues).sort();
+  }, [filterColumn, users]);
 
   return (
     <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
@@ -96,12 +119,14 @@ const TableList: React.FC<UsersTableProps> = ({
           <p className="mt-1 max-w-2xl text-sm text-white">{description}</p>
         </div>
         <div>
-          <Button
-            className="bg-indigo-800 text-white py-2 px-8 rounded-md"
-            onClick={onAdd}
-          >
-            {onAddTitle}
-          </Button>
+          {onAdd && onAddTitle && (
+            <Button
+              onClick={onAdd}
+              className="bg-indigo-800 text-white py-2 px-8 rounded-md"
+            >
+              {onAddTitle}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -114,7 +139,7 @@ const TableList: React.FC<UsersTableProps> = ({
             onChange={handleFilterColumnChange}
           >
             <option value="">Select Filter Column</option>
-            {columnOrder.map((key) => (
+            {allowedColumnOrder.map((key) => (
               <option key={key} value={key}>
                 {columnTitles[key] || key}
               </option>
@@ -122,15 +147,18 @@ const TableList: React.FC<UsersTableProps> = ({
           </select>
 
           {filterColumn && (
-            <input
-              type="text"
-              placeholder={`Filter by ${
-                columnTitles[filterColumn] || filterColumn
-              }...`}
-              className="bg-gray-700 text-white rounded-md py-2 px-3 w-full focus:outline-none focus:none"
+            <select
+              className="bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:none"
               value={filterValue}
               onChange={handleFilterValueChange}
-            />
+            >
+              <option value="">Select Value</option>
+              {filterColumnOptions.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           )}
         </div>
         <input
@@ -164,42 +192,57 @@ const TableList: React.FC<UsersTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {currentUsers.map((user) => (
-              <tr key={user[columnOrder[0]] || Math.random()}>
-                {columnOrder.map((key) => (
-                  <td
-                    key={key}
-                    className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white"
-                  >
-                    {user[key]}
-                  </td>
-                ))}
-                <td className="px-6 py-4 flex justify-end flex-row gap-2 text-right text-sm font-medium">
-                  <Button
-                    onClick={() => onEdit(user)}
-                    className="text-indigo-600 hover:text-indigo-500"
-                  >
-                    <Image
-                      src="/svgs/edit.svg"
-                      alt="Logo"
-                      height={20}
-                      width={20}
-                    />
-                  </Button>
-                  <Button
-                    onClick={() => onDelete(user)}
-                    className="text-red-600 hover:text-red-500"
-                  >
-                    <Image
-                      src="/svgs/delete.svg"
-                      alt="Logo"
-                      height={18}
-                      width={18}
-                    />
-                  </Button>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={columnOrder.length + 1}
+                  className="p-4 text-white text-left"
+                >
+                  Loading...
                 </td>
               </tr>
-            ))}
+            ) : (
+              currentUsers.map((user) => (
+                <tr key={user[columnOrder[0]] || Math.random()}>
+                  {columnOrder.map((key) => (
+                    <td
+                      key={key}
+                      className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white"
+                    >
+                      {user[key]}
+                    </td>
+                  ))}
+                  <td className="px-6 py-4 flex justify-end flex-row gap-2 text-right text-sm font-medium">
+                    {onEdit && (
+                      <Button
+                        onClick={() => onEdit(user)}
+                        className="text-indigo-600 hover:text-indigo-500"
+                      >
+                        <Image
+                          src="/svgs/edit.svg"
+                          alt="Logo"
+                          height={20}
+                          width={20}
+                        />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        onClick={() => onDelete(user)}
+                        className="text-red-600 hover:text-red-500"
+                      >
+                        <Image
+                          src="/svgs/delete.svg"
+                          alt="Logo"
+                          height={18}
+                          width={18}
+                        />
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

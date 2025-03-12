@@ -1,26 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Button from "../Button/Button";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
+  userData: {
+    name: any;
+    email: any;
+    avatar: any;
   };
   onToggle: () => void;
   isOpen: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user, onToggle, isOpen }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+interface DropdownItem {
+  label: string;
+  id: string;
+  icon: string;
+  href: string;
+  onClick?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ userData, onToggle, isOpen }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
 
   const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+    setIsDropdownOpen((prevState) => !prevState);
   };
 
-  const dropdownItems = [
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    localStorage.clear();
+    router.push("/auth/signin");
+  };
+
+  const dropdownItems: DropdownItem[] = [
     {
       label: "Profile",
       id: "profile",
@@ -38,57 +55,63 @@ const Navbar: React.FC<NavbarProps> = ({ user, onToggle, isOpen }) => {
       id: "signout",
       icon: "/svgs/signout-icon.svg",
       href: "#",
+      onClick: handleSignOut,
     },
   ];
-
+  const userInitial = userData?.name?.charAt(0).toUpperCase() || "";
   const hamburgerIcon = isOpen ? "/svgs/close-icon.svg" : "/svgs/menu-icon.svg";
 
   return (
-    <nav className="bg-gray-900 w-full flex items-center justify-between h-[10vh] px-2 lg:px-5 text-white fixed top-0 z-40">
-      <div className="flex flex-row items-center">
-        <Button className="pr-3 block lg:hidden" onClick={onToggle}>
-          <Image src={hamburgerIcon} alt="Humber Menu" width={25} height={25} />
+    <nav className="fixed top-0 z-40 flex w-full h-[10vh] items-center justify-between bg-gray-900 px-2 text-white lg:px-5">
+      <div className="flex items-center">
+        <Button className="pr-3 lg:hidden" onClick={onToggle}>
+          <Image src={hamburgerIcon} alt="Menu" width={25} height={25} />
         </Button>
 
-        <a href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-          <Image
-            width={50}
-            height={50}
-            src="/svgs/logo.png"
-            className=""
-            alt="Logo"
-          />
-          <span className="text-mediumn hidden lg:block font-semibold whitespace-nowrap text-white">
+        <Link
+          href="/"
+          className="flex items-center space-x-2 rtl:space-x-reverse"
+        >
+          <Image width={50} height={50} src="/svgs/logo.png" alt="Logo" />
+          <span className="hidden font-semibold whitespace-nowrap text-white lg:block">
             TENANT MANAGEMENT SYSTEM
           </span>
-        </a>
+        </Link>
       </div>
+
       <div className="relative">
         <button
           onClick={toggleDropdown}
-          className="flex items-center space-x-2 focus:outline-none"
+          className="flex items-center focus:outline-none"
         >
-          <Image
-            width={30}
-            height={30}
-            src={user.avatar}
-            className="rounded-full"
-            alt={user.name}
-          />
+          {userData.name ? (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 text-white font-bold">
+              {userInitial}
+            </div>
+          ) : (
+            <Image
+              width={30}
+              height={30}
+              src={userData.avatar}
+              className="rounded-full"
+              alt={userData.name}
+            />
+          )}
         </button>
 
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-10">
+          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-10 bg-gray-700">
             <div className="py-1">
               <div className="px-4 py-2 text-sm text-white">
-                {user.name}
-                <div className="text-xs text-gray-300">{user.email}</div>
+                {userData.name}
+                <div className="text-xs text-gray-300">{userData.email}</div>
               </div>
               {dropdownItems.map((item) => (
                 <Link
                   key={item.id}
                   href={item.href}
-                  className="block flex flex-row gap-3 px-4 py-2 text-sm text-white hover:bg-gray-600"
+                  onClick={item.onClick}
+                  className="flex flex-row gap-3 px-4 py-2 text-sm text-white hover:bg-gray-600 block"
                 >
                   <Image
                     src={item.icon}

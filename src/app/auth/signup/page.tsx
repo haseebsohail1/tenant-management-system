@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import withAuthProtection from "@/app/authGuard";
-import SignupForm from "@/components/SignupForm";
+import SignupForm from "@/Screens/SignupForm";
 import ImageCarousel from "@/components/SigninSignupImageCarousel";
 
 const Signup = () => {

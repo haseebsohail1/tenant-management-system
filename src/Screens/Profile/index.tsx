@@ -1,24 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Button from "../../components/Button/Button";
 import InputField from "@/components/InputField";
+import { useSession } from "next-auth/react";
 
 interface ProfileProps {}
 
 interface UserData {
-  firstName: string;
+  fullName: string;
   phone: string;
   role: string;
   email: string;
 }
 
 const Profile: React.FC<ProfileProps> = () => {
+  const { data: session, status } = useSession();
+
   const [userData, setUserData] = useState<UserData>({
-    firstName: "Neil Neil Neil",
-    phone: "123-456-7890",
-    role: "Tenant",
-    email: "neil.sims@example.com",
+    fullName: "",
+    phone: "",
+    role: "",
+    email: "",
   });
+
+  useEffect(() => {
+    if (session?.user) {
+      setUserData({
+        fullName: session.user.name || "",
+        phone: session.user.phone || "",
+        role: session.user.role || "",
+        email: session.user.email || "",
+      });
+    }
+  }, [session]);
+
+  const userInitial = userData?.fullName?.charAt(0).toUpperCase() || "";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,16 +61,22 @@ const Profile: React.FC<ProfileProps> = () => {
         </div>
         <div className="lg:col-span-2">
           <div className="flex items-center mb-6">
-            <Image
-              src="/svgs/user-profile.png"
-              alt="Profile Avatar"
-              className="w-20 h-20 rounded-full mr-4"
-              width={30}
-              height={30}
-            />
+            {userData.fullName ? (
+              <div className="flex w-20 h-20 text-[35px] items-center mr-4 justify-center rounded-full bg-gray-500 text-white font-bold">
+                {userInitial}
+              </div>
+            ) : (
+              <Image
+                src="/svgs/user-profile.png"
+                alt="Profile Avatar"
+                className="w-20 h-20 rounded-full mr-4"
+                width={30}
+                height={30}
+              />
+            )}
             <div className="flex flex-col gap-0">
               <h6 className="m-0 p-0 text-lg font-medium text-white">
-                {userData.firstName}
+                {userData.fullName}
               </h6>
               <p className="m-0 p-0 text-sm font-medium text-white">
                 {userData.role}
@@ -68,7 +90,7 @@ const Profile: React.FC<ProfileProps> = () => {
                 type="text"
                 name="firstName" // Use name!
                 placeholder="John"
-                value={userData.firstName}
+                value={userData.fullName}
                 onChange={handleChange}
                 required={true}
               />
@@ -92,6 +114,7 @@ const Profile: React.FC<ProfileProps> = () => {
               value={userData.role}
               onChange={handleChange}
               required={true}
+              disabled={true}
             />
 
             {/* Email Field */}
@@ -103,6 +126,7 @@ const Profile: React.FC<ProfileProps> = () => {
               value={userData.email}
               onChange={handleChange}
               required={true}
+              disabled={true}
             />
           </div>
 

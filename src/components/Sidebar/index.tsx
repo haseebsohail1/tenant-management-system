@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,11 +18,12 @@ interface NavItem {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
+  const { data: session, status } = useSession();
   const sidebarClasses = `h-[90vh] bg-gray-900 text-white w-64 flex-shrink-0 transition-transform duration-300 ${
     isOpen ? "translate-x-0" : "-translate-x-full"
   } lg:translate-x-0 fixed top-[10vh] left-0 z-40`;
 
-  const navItems: NavItem[] = [
+  const navItemsLandlord: NavItem[] = [
     {
       id: "dashboard",
       label: "Dashboard",
@@ -54,6 +56,57 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
     },
   ];
 
+  const navItemsTenant: NavItem[] = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: "/svgs/dashboard-icon.svg",
+    },
+  ];
+
+  const navItemsAdmin: NavItem[] = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: "/svgs/dashboard-icon.svg",
+    },
+    {
+      id: "users",
+      label: "Users",
+      href: "/admin-users",
+      icon: "/svgs/users-icon.svg",
+    },
+    {
+      id: "properties",
+      label: "Properties",
+      href: "/admin-properties",
+      icon: "/svgs/propery-icon.svg",
+    },
+  ];
+
+  let userRole = null;
+  if (session?.user?.role) {
+    userRole = session.user.role;
+  }
+
+  let navItems: NavItem[] = [];
+
+  switch (userRole) {
+    case "Admin":
+      navItems = navItemsAdmin;
+      break;
+    case "Landlord":
+      navItems = navItemsLandlord;
+      break;
+    case "Tenant":
+      navItems = navItemsTenant;
+      break;
+    default:
+      null;
+  }
+
   return (
     <>
       {isOpen && (
@@ -64,6 +117,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
       )}
       <div className={sidebarClasses}>
         <div className="mt-6 px-4 grid grid-col gap-3">
+          {session && (
+            <div className="text-sm text-yellow-300 font-semibold">
+              {userRole === "Admin"
+                ? "Admin"
+                : userRole === "Landlord"
+                ? "Landlord"
+                : userRole === "Tenant"
+                ? "Tenant"
+                : ""}
+            </div>
+          )}
           {navItems.map((item) => (
             <Link href={item.href} key={item.id}>
               <span
@@ -71,7 +135,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
                   active === item.id ? "bg-gray-700 text-yellow-300" : ""
                 }`}
               >
-                {" "}
                 <Image
                   alt={item.label}
                   src={item.icon}

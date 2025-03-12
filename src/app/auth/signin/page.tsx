@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import withAuthProtection from "@/app/authGuard";
-import SigninForm from "@/components/SigninForm";
+import SigninForm from "@/Screens/SigninForm";
 import ImageCarousel from "@/components/SigninSignupImageCarousel";
 
 const Signin = () => {

@@ -59,8 +59,10 @@ const InputField: React.FC<InputFieldProps> = ({
               onChange(e as any)
             }
             placeholder={placeholder}
-            className={`w-full px-4 h-28 bg-gray-700 text-white text-sm rounded-md p-3 w-full focus:outline-none focus:none ${
-              disabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : ""
+            className={`w-full px-4 h-28 text-sm rounded-md p-3 w-full focus:outline-none focus:none ${
+              disabled
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                : "bg-gray-700 text-white"
             } ${className}`}
           />
         ) : (
@@ -75,8 +77,10 @@ const InputField: React.FC<InputFieldProps> = ({
             readOnly={disabled}
             onChange={onChange}
             placeholder={placeholder}
-            className={`bg-gray-700 text-white text-sm rounded-md p-3 w-full focus:outline-none focus:none  ${
-              disabled ? "bg-gray-800 text-gray-400 cursor-not-allowed" : ""
+            className={`text-sm rounded-md p-3 w-full focus:outline-none focus:none  ${
+              disabled
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                : "bg-gray-700 text-white"
             } ${className}`}
           />
         )}

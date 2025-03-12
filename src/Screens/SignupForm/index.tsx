@@ -1,17 +1,17 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button/Button";
-import { useState, ChangeEvent } from "react";
+import { useState, FormEvent } from "react";
 import InputField from "@/components/InputField";
 import toast from "react-hot-toast";
+import { Signup } from "@/components/ApiComponent";
 
 interface FormData {
   name: string;
   phone: string;
   email: string;
   password: string;
-  role: "landlord" | "tenant";
+  role: "Landlord" | "Tenant";
 }
 
 const SignupForm = () => {
@@ -20,9 +20,10 @@ const SignupForm = () => {
     phone: "",
     email: "",
     password: "",
-    role: "tenant",
+    role: "Tenant",
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null); // State for password error message
   const router = useRouter();
 
   const handleChange = (e: any) => {
@@ -30,7 +31,57 @@ const SignupForm = () => {
     setFormData({ ...formData, [name]: value.trim() });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {};
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+    if (!/[@$!%*?&]/.test(password)) {
+      return "Password must contain at least one special character (@, $, !, %, *, ?, or &).";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must contain at least one number.";
+    }
+    return null; // Password is valid
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const passwordErrorMessage = validatePassword(formData.password);
+    if (passwordErrorMessage) {
+      setPasswordError(passwordErrorMessage);
+      return;
+    } else {
+      setPasswordError(null); // Clear the error if the password is valid
+    }
+
+    setLoading(true);
+    try {
+      const response = await Signup(formData);
+      if (response.status === 200 || response.status === 201) {
+        toast.success(
+          "Signup successful! Please check your email for verification."
+        );
+        router.push("/auth/signin");
+      } else {
+        toast.error(`Signup failed: ${response.statusText}`);
+      }
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      let errorMessage = "An error occurred.";
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      toast.error(`Signup failed: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="lg:px-5 flex flex-col justify-center">
@@ -90,13 +141,15 @@ const SignupForm = () => {
             onChange={handleChange}
           />
         </div>
-
+        {passwordError && (
+          <div className="text-red-500 mt-1">{passwordError}</div>
+        )}
         <div className="mt-5">
           <label
             htmlFor="role"
             className="block text-mediumn font-medium text-neutral-100 mb-1"
           >
-            Role <span className="text-red-500">&nbsp;*</span>
+            Role <span className="text-red-500"> *</span>
           </label>
           <select
             id="role"
@@ -105,24 +158,9 @@ const SignupForm = () => {
             value={formData.role}
             onChange={handleChange}
           >
-            <option value="tenant">Tenant</option>
-            <option value="landlord">Landlord</option>
+            <option value="Tenant">Tenant</option>
+            <option value="Landlord">Landlord</option>
           </select>
-        </div>
-
-        <div className="flex items-center mt-5">
-          <input
-            type="checkbox"
-            name="terms_condition"
-            id="terms_condition"
-            className="h-4 w-4 text-indigo-600 focus:none border-gray-300 rounded"
-          />
-          <label
-            htmlFor="terms_condition"
-            className="ml-2 block text-mediumn text-white"
-          >
-            I agree to the terms & conditions
-          </label>
         </div>
 
         <div className="mt-8">
