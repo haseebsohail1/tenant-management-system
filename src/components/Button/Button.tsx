@@ -6,9 +6,9 @@ interface ButtonProps {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   className?: string;
-  iconSrc?: string; // Path to the icon image
-  iconAlt?: string; // Alt text for the icon image
-  iconSize?: number; // Size for the icon image
+  iconSrc?: string;
+  iconAlt?: string;
+  iconSize?: number;
   disabled?: boolean;
 }
 
@@ -19,14 +19,14 @@ const Button: React.FC<ButtonProps> = ({
   className = "",
   iconSrc,
   iconAlt = "icon",
-  iconSize = 24, // Default icon size
+  iconSize = 24,
   disabled = false,
 }) => {
   return (
     <button
       type={type}
       onClick={disabled ? undefined : onClick}
-      className={`flex items-center justify-center space-x-2 ${className} ${
+      className={`flex items-center justify-center space-x-2  ${className} ${
         disabled ? "bg-gray-400 text-gray-700 cursor-not-allowed" : ""
       }`}
       disabled={disabled}
