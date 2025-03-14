@@ -19,14 +19,14 @@ const ImageCarousel = () => {
               <Image
                 src={src}
                 alt={`Slide ${index + 1}`}
-                height={1200}
+                height={600}
                 width={660}
-                className="min-h-[90vh] md:block hidden max-h-auto object-cover"
+                className="h-[600px] md:block hidden  object-cover"
               />
               <div className="absolute top-8 left-8">
                 <div>
                   <Image
-                    src="/svgs/logo-white.svg"
+                    src="/svgs/logo.png"
                     alt="Logo"
                     height={26}
                     width={113}

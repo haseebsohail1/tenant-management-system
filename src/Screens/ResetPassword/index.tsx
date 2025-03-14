@@ -42,11 +42,6 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     }
 
     setLoading(true);
-
-    console.log("Reset Token:", token);
-    console.log("New Password:", newPassword);
-    console.log("Confirm Password:", confirmPassword);
-
     try {
       if (typeof token === "string") {
         const response: any = await ResetPassword(
@@ -105,7 +100,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         />
         <Button
           type="submit"
-          className="mt-8 w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-indigo-700 focus:outline-none focus:none"
+          className="mt-8 w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-yellow-600 focus:outline-none focus:none"
           disabled={loading}
         >
           {loading ? "Resetting..." : "Reset Password"}

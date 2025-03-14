@@ -95,3 +95,16 @@ export const GetPropertiesList = async (token: string) => {
     throw error;
   }
 };
+
+export const GetCardsList = async (token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/analytics/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};

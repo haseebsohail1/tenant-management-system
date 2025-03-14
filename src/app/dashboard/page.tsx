@@ -2,11 +2,14 @@
 "use client";
 import React from "react";
 import Wrapper from "@/components/Wrapper";
+import Dashboardcards from "@/components/Crads";
+import CardComponent from "@/components/CradsList";
 
 function Dashboard() {
   return (
     <Wrapper active={"dashboard"}>
-      <h1>Dashboard Content</h1>
+      <CardComponent />
+      <Dashboardcards />
     </Wrapper>
   );
 }

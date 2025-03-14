@@ -62,7 +62,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         />
         <Button
           type="submit"
-          className="mt-5 w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-indigo-700 focus:outline-none focus:none"
+          className="mt-5 w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-yellow-600 focus:outline-none focus:none"
           disabled={loading}
         >
           {loading ? "Sending..." : "Send Reset Link"}

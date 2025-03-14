@@ -1,16 +1,22 @@
+// components/AdminUsersList.tsx
+
 import React, { useState, useEffect } from "react";
-import TableList from "@/components/TableList";
+import TableHeader from "@/components/TableHeader";
 import { useSession } from "next-auth/react";
 import { GetUserList } from "@/components/ApiComponent";
+import UserTable from "@/components/TableList";
 
 interface User {
-  [key: string]: any;
+  _id: any;
+  name: string;
+  email: any;
+  role: any;
+  createdAt: any;
 }
 
 const AdminUsersList: React.FC = () => {
   const { data: session } = useSession();
-  const [landlordUsers, setLandlordUsers] = useState<User[]>([]);
-  const [tenantUsers, setTenantUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const columnOrder = ["name", "email", "role", "createdAt"];
@@ -22,53 +28,52 @@ const AdminUsersList: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchUsers = async (role: string) => {
-      try {
-        if (session?.token) {
-          const response = await GetUserList(role, session?.token);
-
-          if (response?.data?.result?.data) {
-            return response.data.result.data;
-          } else {
-            return [];
-          }
-        } else {
-          return [];
-        }
-      } catch (err: any) {
-        console.error(`Failed to fetch ${role} users:`, err);
-        return [];
-      }
-    };
-
-    const loadUsers = async () => {
+    const fetchUsers = async () => {
       setLoading(true);
       try {
-        const landlordData = await fetchUsers("Landlord");
-        setLandlordUsers(landlordData);
+        if (session?.token) {
+          const roles = ["Landlord", "Tenant", "Manager"];
+          const allUserData: User[] = [];
 
-        const tenantData = await fetchUsers("Tenant");
-        setTenantUsers(tenantData);
+          for (const role of roles) {
+            const response = await GetUserList(role, session?.token);
+            console.log(response);
+            if (response?.data?.result?.data) {
+              allUserData.push(...response.data.result.data);
+            } else {
+              console.warn(`No ${role} users found.`);
+            }
+          }
+
+          setAllUsers(allUserData);
+        } else {
+          console.warn("No session token available.");
+          setAllUsers([]);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch users:", err);
+        setAllUsers([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadUsers();
+    fetchUsers();
   }, [session]);
 
-  const allUsers = [...landlordUsers, ...tenantUsers];
-
   return (
-    <TableList
-      users={loading ? [] : allUsers}
-      title="All Users List"
-      description="A list of registered users."
-      columnOrder={columnOrder}
-      columnTitles={columnTitles}
-      itemsPerPage={10}
-      loading={loading}
-    />
+    <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
+      <TableHeader
+        title="All Users List"
+        description="A list of registered users."
+      />
+      <UserTable
+        users={allUsers}
+        columnOrder={columnOrder}
+        columnTitles={columnTitles}
+        loading={loading}
+      />
+    </div>
   );
 };
 

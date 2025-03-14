@@ -45,7 +45,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <div className="mt-2">
       <label className="block font-mediumn text-white mb-1" htmlFor={name}>
         {label}
-        {required && <span className="text-red-500">&nbsp;*</span>}
+        {required && <span className="text-yellow-500">&nbsp;*</span>}
       </label>
       <div className="relative mt-2">
         {type === "textarea" ? (

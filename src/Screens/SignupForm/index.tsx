@@ -92,7 +92,7 @@ const SignupForm = () => {
         <div className="text-base font-normal text-white ">
           Already have an account?
           <span
-            className="pl-2 text-indigo-600 cursor-pointer"
+            className="pl-2 text-yellow-500 cursor-pointer"
             onClick={() => router.push("/auth/signin")}
           >
             Log In
@@ -149,7 +149,7 @@ const SignupForm = () => {
             htmlFor="role"
             className="block text-mediumn font-medium text-neutral-100 mb-1"
           >
-            Role <span className="text-red-500"> *</span>
+            Role <span className="text-yellow-500"> *</span>
           </label>
           <select
             id="role"
@@ -166,7 +166,7 @@ const SignupForm = () => {
         <div className="mt-8">
           <Button
             type="submit"
-            className="w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-indigo-700 focus:outline-none focus:none"
+            className="w-full h-[50px] flex justify-center items-center px-3 border border-transparent rounded-md shadow-sm text-medium font-medium text-white bg-yellow-600 focus:outline-none focus:none"
             disabled={loading}
           >
             {loading ? "Signing Up..." : "Sign Up Your Account"}
