@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode, useState } from "react";
 import { usePathname } from "next/navigation";
+import ReduxProvider from "@/redux/ReduxProvider";
 
 const alexandria = Alexandria({ subsets: ["latin"] });
 
@@ -34,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main
             className={`content flex-1 overflow-y-auto w-full bg-gray-900 h-screen overflow-auto`}
           >
-            {children}
+            { <ReduxProvider>{children}</ReduxProvider> }
           </main>
         </SessionProvider>
       </body>
