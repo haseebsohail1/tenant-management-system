@@ -83,13 +83,16 @@ export const GetUserList = async (role: string, token: string) => {
   }
 };
 
-export const GetPropertiesList = async (token: string) => {
+export const GetPropertiesList = async (Landloard: string, token: string) => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/property/list`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      `${BASE_URL}/api/property/list?landlordId=${Landloard}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response;
   } catch (error: any) {
     throw error;
@@ -103,6 +106,27 @@ export const GetCardsList = async (token: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const GetAdminPropertiesList = async (
+  token: string,
+  state: string,
+  country: string,
+  city: string
+) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/analytics/properties?state=${state}&country=${country}&city=${city}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response;
   } catch (error: any) {
     throw error;

@@ -1,6 +1,7 @@
 // redux/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers } from "redux";
+import { adminReducer } from "./adminSlice";
 import {
   persistStore,
   persistReducer,
@@ -17,6 +18,7 @@ import authReducer from "./authSlice";
 // 1) Combine your reducers into a rootReducer
 const rootReducer = combineReducers({
   auth: authReducer,
+  admin: adminReducer,
 });
 
 // 2) Create persist config for localStorage
@@ -32,7 +34,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 // 4) Configure the store using the persisted reducer
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) => 
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],

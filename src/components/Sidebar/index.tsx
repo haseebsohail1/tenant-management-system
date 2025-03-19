@@ -25,15 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
 
   const navItemsLandlord: NavItem[] = [
     {
-      id: "dashboard",
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: "/svgs/dashboard-icon.svg",
-    },
-    {
       id: "properties",
       label: "Properties",
-      href: "/properties",
+      href: "/all-properties",
       icon: "/svgs/propery-icon.svg",
     },
     {
@@ -52,6 +46,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
       id: "documents",
       label: "Documents",
       href: "/documents",
+      icon: "/svgs/documents-icon.svg",
+    },
+    {
+      id: "bookings",
+      label: "Bookings",
+      href: "/bookings",
       icon: "/svgs/documents-icon.svg",
     },
   ];
@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
     {
       id: "properties",
       label: "Properties",
-      href: "/admin-properties",
+      href: "/all-properties",
       icon: "/svgs/propery-icon.svg",
     },
   ];

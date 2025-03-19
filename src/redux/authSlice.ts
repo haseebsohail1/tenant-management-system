@@ -1,22 +1,22 @@
 // redux/authSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState } from './interface'; // Import the interface
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AuthState } from "./interface"; // Import the interface
 
 const initialState: AuthState = {
-  id: '',
-  _id: '',
-  role: '',
-  email: '',
-  token: '',
+  id: "",
+  _id: "",
+  role: "",
+  email: "",
+  token: "",
   user: {},
   isAuthenticated: false,
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
-    login(state, action: PayloadAction<Omit<AuthState, 'isAuthenticated'>>) {
+    login(state, action: PayloadAction<Omit<AuthState, "isAuthenticated">>) {
       // Set user data on login
       state.id = action.payload.id;
       state._id = action.payload._id;
@@ -28,11 +28,11 @@ const authSlice = createSlice({
     },
     logout(state) {
       // Clear user data on logout
-      state.id = '';
-      state._id = '';
-      state.role = '';
-      state.email = '';
-      state.token = '';
+      state.id = "";
+      state._id = "";
+      state.role = "";
+      state.email = "";
+      state.token = "";
       state.user = {};
       state.isAuthenticated = false;
     },

@@ -85,13 +85,8 @@ const PropertyList: React.FC = () => {
         users={users}
         onEdit={handleEditUser}
         onDelete={handleDeleteUser}
-        onAddTitle="Add User"
-        title="User List"
-        description="A list of registered users."
         columnOrder={columnOrder}
         columnTitles={columnTitles}
-        itemsPerPage={4}
-        onAdd={handleAddClick}
       />
       <ModalComponent
         isOpen={isAddModalOpen}

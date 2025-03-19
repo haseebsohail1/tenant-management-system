@@ -1,26 +1,9 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 import withAuthProtection from "@/app/authGuard";
 import SigninForm from "@/Screens/SigninForm";
 import ImageCarousel from "@/components/SigninSignupImageCarousel";
 
 const Signin = () => {
-  const { data: session, status }: any = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (session) {
-      router.push("/dashboard");
-    }
-  }, [session, router]);
-
-  if (status === "authenticated") {
-    return null;
-  }
-
   return (
     <>
       <div className="bg-gray-900 max-h-auto min-h-screen flex justify-center items-center">

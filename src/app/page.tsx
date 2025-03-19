@@ -10,13 +10,28 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
 
+  const handleSuccessfulSignIn = (role: string) => {
+    switch (role) {
+      case "Admin":
+        router.push("/dashboard");
+        break;
+      case "Landlord":
+        router.push("/all-properties");
+        break;
+      default:
+        null;
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       if (status === "loading") {
         return;
       }
       if (session) {
-        router.push("/dashboard");
+        if (session?.user && session?.user?.role) {
+          handleSuccessfulSignIn(session.user.role);
+        }
       } else {
         router.push("/auth/signin");
       }

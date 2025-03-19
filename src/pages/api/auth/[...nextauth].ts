@@ -36,7 +36,7 @@ export default NextAuth({
             }),
           }
         );
-        console.log({res})
+        console.log({ res });
 
         const user = await res.json();
 

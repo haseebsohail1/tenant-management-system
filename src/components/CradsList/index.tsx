@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { GetCardsList } from "../ApiComponent";
 import Usercharts from "../Usercharts";
+import PropertiesTable from "@/components/PropertiesTable";
 
 interface CardProps {}
 
@@ -120,6 +121,8 @@ const Card: React.FC<CardProps> = ({}) => {
         totalusers={totalusers}
         barHeights={barHeights}
       />
+
+      <PropertiesTable />
     </div>
   );
 };

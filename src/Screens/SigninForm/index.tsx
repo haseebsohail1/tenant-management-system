@@ -30,7 +30,6 @@ const SigninForm = () => {
 
       if (res?.error == null) {
         toast.success("Login Successful");
-        router.push("/dashboard");
       } else {
         toast.error(res.error || "Failed to sign in");
       }

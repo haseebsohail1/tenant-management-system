@@ -1,116 +1,80 @@
-import React, { useState, ChangeEvent, useMemo } from "react";
+// components/TableSearchAndFilter.tsx
 
+import React, { useState, ChangeEvent } from "react";
 interface TableSearchAndFilterProps {
-  users: any[];
-  columnTitles: { [key: string]: string };
-  onFilterChange: (filterColumn: string, filterValue: string) => void;
-  filterColumnOrder: string[];
-  selectedFilterColumn: string;
-  selectedFilterValue: string;
+  searchTerm: string;
+  setSearchTerm: (searchTerm: string) => void;
+  roleFilter: string;
+  setRoleFilter: (roleFilter: string) => void;
+  roles: string[];
+  FilterTitle: string;
+  SearchTitle: string;
 }
 
 const TableSearchAndFilter: React.FC<TableSearchAndFilterProps> = ({
-  users,
-  columnTitles,
-  onFilterChange,
-  filterColumnOrder,
-  selectedFilterColumn,
-  selectedFilterValue,
+  searchTerm,
+  setSearchTerm,
+  roleFilter,
+  setRoleFilter,
+  roles,
+  FilterTitle,
+  SearchTitle,
 }) => {
-  const [filterColumn, setFilterColumn] = useState<string>(
-    selectedFilterColumn || ""
-  );
-  const [filterValue, setFilterValue] = useState<string>(
-    selectedFilterValue || ""
-  );
-
-  const handleColumnChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const newFilterColumn = e.target.value;
-    setFilterColumn(newFilterColumn);
-    setFilterValue(""); // Clear filter value when column changes
-    onFilterChange(newFilterColumn, "");
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
-  const handleFilterValueChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const newFilterValue = e.target.value;
-    setFilterValue(newFilterValue);
-    onFilterChange(filterColumn, newFilterValue);
+  const handleRoleFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setRoleFilter(e.target.value);
   };
-
-  const filterColumnOptions = useMemo(() => {
-    console.log("filterColumnOptions is running"); // [TROUBLESHOOTING LOG 3]
-    if (!filterColumn) {
-      console.log("No filterColumn selected"); // [TROUBLESHOOTING LOG 4]
-      return [];
-    }
-
-    const uniqueValues = new Set<string>();
-
-    if (filterColumn === "role") {
-      console.log("Filtering by role"); // [TROUBLESHOOTING LOG 5]
-      users.forEach((user) => {
-        if (user.role) {
-          uniqueValues.add(String(user.role).toLowerCase());
-          console.log("Adding role:", user.role); // [TROUBLESHOOTING LOG 6]
-        } else {
-          console.log("User has no role:", user); // [TROUBLESHOOTING LOG 7]
-        }
-      });
-    } else {
-      console.log("Filtering by other column:", filterColumn); // [TROUBLESHOOTING LOG 8]
-      users.forEach((user) => {
-        const value = user[filterColumn];
-        if (value !== undefined && value !== null) {
-          uniqueValues.add(String(value).toLowerCase());
-        }
-      });
-    }
-
-    const options = Array.from(uniqueValues).sort();
-    console.log("Filter Column Options:", options); // [TROUBLESHOOTING LOG 9]
-    return options;
-  }, [users, filterColumn]);
 
   return (
     <div className="p-4 bg-gray-800 flex items-center justify-between space-x-4">
-      <div className="flex items-center gap-2">
-        <label htmlFor="filterColumn" className="text-white">
-          Filter By:
-        </label>
+      <div className="flex flex-row gap-3 items-center">
+        <span className="text-mediumn text-white">
+          Filter By {FilterTitle}:
+        </span>
         <select
-          id="filterColumn"
-          className="bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:none"
-          value={filterColumn}
-          onChange={handleColumnChange}
+          className="px-4 py-3 rounded-md bg-gray-700 text-white focus:outline-none focus:none"
+          value={roleFilter}
+          onChange={handleRoleFilterChange}
         >
-          <option value="">Select Column</option>
-          {filterColumnOrder.map((col) => (
-            <option key={col} value={col}>
-              {columnTitles[col] || col}
-            </option>
-          ))}
+          <option value="">Select {FilterTitle}</option>
+          {roles
+            .filter((role) => role !== "")
+            .map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
         </select>
+      </div>
 
-        {filterColumn && ( // Conditionally render the value select
-          <>
-            <label htmlFor="filterValue" className="text-white ml-2">
-              Select Value:
-            </label>
-            <select
-              id="filterValue"
-              className="bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:none"
-              value={filterValue}
-              onChange={handleFilterValueChange}
-            >
-              <option value="">Select Value</option>
-              {filterColumnOptions.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-500 dark:text-gray-400"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 20 20"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+            />
+          </svg>
+        </div>
+        <input
+          type="text"
+          placeholder={`Search by ${SearchTitle}`}
+          className="py-2 pr-5 w-full pl-9 rounded-md bg-gray-700 text-white focus:outline-none focus:none"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
       </div>
     </div>
   );

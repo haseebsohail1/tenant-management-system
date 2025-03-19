@@ -1,23 +1,25 @@
-// components/AdminUsersList.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TableHeader from "@/components/TableHeader";
 import { useSession } from "next-auth/react";
 import { GetUserList } from "@/components/ApiComponent";
 import UserTable from "@/components/TableList";
-
-interface User {
-  _id: any;
-  name: string;
-  email: any;
-  role: any;
-  createdAt: any;
-}
+import TableSearchAndFilter from "@/components/SearchFilters";
+import Pagination from "@/components/Pagination";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { RootState } from "@/redux/store";
+import {
+  setUsers,
+  setFilteredUsers,
+  setLoading,
+  setSearchTerm,
+  setRoleFilter,
+} from "@/redux/adminSlice";
 
 const AdminUsersList: React.FC = () => {
   const { data: session } = useSession();
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const dispatch = useAppDispatch();
+  const { users, filteredUsers, loading, searchTerm, roleFilter } =
+    useAppSelector((state: RootState) => state.admin);
 
   const columnOrder = ["name", "email", "role", "createdAt"];
   const columnTitles = {
@@ -27,39 +29,50 @@ const AdminUsersList: React.FC = () => {
     createdAt: "Created At",
   };
 
+  const roles = ["", "Landlord", "Tenant", "Manager"];
+
   useEffect(() => {
     const fetchUsers = async () => {
-      setLoading(true);
+      dispatch(setLoading(true));
       try {
         if (session?.token) {
-          const roles = ["Landlord", "Tenant", "Manager"];
-          const allUserData: User[] = [];
-
-          for (const role of roles) {
-            const response = await GetUserList(role, session?.token);
-            console.log(response);
-            if (response?.data?.result?.data) {
-              allUserData.push(...response.data.result.data);
-            } else {
-              console.warn(`No ${role} users found.`);
-            }
+          const response = await GetUserList("", session?.token);
+          console.log(response);
+          if (response?.data?.result?.data) {
+            dispatch(setUsers(response.data.result.data));
           }
-
-          setAllUsers(allUserData);
-        } else {
-          console.warn("No session token available.");
-          setAllUsers([]);
+          if (response?.data?.result?.pagination) {
+            console.log(response?.data?.result?.pagination);
+          }
         }
       } catch (err: any) {
-        console.error("Failed to fetch users:", err);
-        setAllUsers([]);
+        dispatch(setUsers([]));
       } finally {
-        setLoading(false);
+        dispatch(setLoading(false));
       }
     };
 
     fetchUsers();
-  }, [session]);
+  }, [session, dispatch]);
+
+  useEffect(() => {
+    let filtered = [...users];
+
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(lowerSearchTerm) ||
+          user.email.toLowerCase().includes(lowerSearchTerm)
+      );
+    }
+
+    if (roleFilter) {
+      filtered = filtered.filter((user) => user.role === roleFilter);
+    }
+
+    dispatch(setFilteredUsers(filtered));
+  }, [users, searchTerm, roleFilter, dispatch]);
 
   return (
     <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
@@ -67,8 +80,19 @@ const AdminUsersList: React.FC = () => {
         title="All Users List"
         description="A list of registered users."
       />
+
+      <TableSearchAndFilter
+        searchTerm={searchTerm}
+        setSearchTerm={(term) => dispatch(setSearchTerm(term))}
+        roleFilter={roleFilter}
+        setRoleFilter={(filter) => dispatch(setRoleFilter(filter))}
+        roles={roles}
+        FilterTitle="Roles"
+        SearchTitle="name and email"
+      />
+
       <UserTable
-        users={allUsers}
+        users={filteredUsers}
         columnOrder={columnOrder}
         columnTitles={columnTitles}
         loading={loading}

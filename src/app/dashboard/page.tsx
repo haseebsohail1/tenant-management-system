@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx  (or pages/dashboard.tsx if using the pages directory)
 "use client";
 import React from "react";
 import Wrapper from "@/components/Wrapper";

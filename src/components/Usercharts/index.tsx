@@ -19,17 +19,17 @@ const ActiveUsersCard: React.FC<ActiveUsersCardProps> = ({
     {
       label: "Landlords",
       count: totallandLords,
-      color: "white",
+      color: "#5fc9e9",
     },
     {
       label: "Tenants",
       count: totaltenants,
-      color: "#4457E8",
+      color: "#ed5a72",
     },
     {
       label: "Managers",
       count: totalmanagers,
-      color: "#6676f6",
+      color: "#f9c95c",
     },
   ];
 
@@ -37,12 +37,6 @@ const ActiveUsersCard: React.FC<ActiveUsersCardProps> = ({
 
   const calculatePercentage = (count: number): number => {
     return totalRoles === 0 ? 0 : (count / totalRoles) * 100;
-  };
-
-  const calculateBarHeight = (count: number): number => {
-    if (totalusers === 0) return 0;
-    const percentage = (count / totalusers) * 100;
-    return Math.min(percentage, 100);
   };
 
   return (

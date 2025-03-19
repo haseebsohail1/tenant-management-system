@@ -3,18 +3,20 @@ import Button from "../Button/Button";
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  total: number;
   onPageChange: (page: number) => void;
-  itemsPerPage: number;
-  totalItems: number;
+  from: number;
+  to: number; // type should be number
+  PageSize: number;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
-  totalPages,
+  total,
   onPageChange,
-  itemsPerPage,
-  totalItems,
+  from,
+  to,
+  PageSize,
 }) => {
   const goToPreviousPage = () => {
     onPageChange(currentPage - 1);
@@ -24,14 +26,10 @@ const Pagination: React.FC<PaginationProps> = ({
     onPageChange(currentPage + 1);
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
   return (
     <div className="bg-gray-900 px-4 py-3 flex items-center justify-between border-t border-gray-700 sm:px-6">
       <div className="text-sm text-white">
-        Showing {startIndex + 1} to {endIndex} of {totalItems}
-        results
+        Showing {from} to {to} of {total} results
       </div>
       <div className="flex items-center">
         <Button
@@ -55,7 +53,7 @@ const Pagination: React.FC<PaginationProps> = ({
         </Button>
         <Button
           onClick={goToNextPage}
-          disabled={currentPage === totalPages || totalPages === 0}
+          disabled={currentPage === PageSize || PageSize === 0}
           className="bg-gray-800 text-white p-2 rounded-full hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
