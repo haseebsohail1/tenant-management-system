@@ -78,7 +78,7 @@ const ModalComponent: React.FC<AddUserModalProps> = ({
             </Button>
             <Button
               type="button"
-              className="rounded-md shadow-sm px-8 py-2 bg-indigo-800 text-white font-medium focus:none"
+              className="rounded-md shadow-sm px-8 py-2 bg-yellow-600 text-white font-medium focus:none"
               onClick={handleSave}
             >
               Save

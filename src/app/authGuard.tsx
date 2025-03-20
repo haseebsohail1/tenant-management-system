@@ -9,6 +9,9 @@ const withAuthProtection = (WrappedComponent: React.FC) => {
 
     const handleSuccessfulSignIn = (role: string) => {
       switch (role) {
+        case "Admin":
+          router.replace("/dashboard");
+          break;
         case "Landlord":
           router.replace("/all-properties");
           break;
@@ -25,7 +28,7 @@ const withAuthProtection = (WrappedComponent: React.FC) => {
       }
     }, [status, router]);
 
-    if (status === "loading" || session) return null; // Prevent page rendering
+    if (status === "loading" || session) return null;
 
     return <WrappedComponent {...props} />;
   };

@@ -10,7 +10,7 @@ interface Property {
   city: string;
   state: string;
   country: string;
-  unitCount: number;
+  unit: number;
 }
 
 type FilterType = "all" | "state" | "country" | "city";
@@ -97,7 +97,7 @@ const PropertiesTable: React.FC = () => {
     "City",
     "State",
     "Country",
-    "UnitCount",
+    "Unit",
   ];
   const propertyKeys: (keyof Property)[] = [
     "name",
@@ -106,7 +106,7 @@ const PropertiesTable: React.FC = () => {
     "city",
     "state",
     "country",
-    "unitCount",
+    "unit",
   ];
 
   return (

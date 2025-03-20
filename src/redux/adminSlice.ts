@@ -1,15 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User, Property } from "./interface";
+import { User, Property, Unit } from "./interface";
 
 interface AdminState {
   users: User[];
   filteredUsers: User[];
   properties: Property[];
   filteredProperties: Property[];
+  units: Unit[];
+  filteredUnits: Unit[];
   loading: boolean;
   searchTerm: string;
   roleFilter: string;
   ownerFilter: string;
+  statusFilter: string;
   error: string | null;
 }
 
@@ -18,10 +21,13 @@ const initialState: AdminState = {
   filteredUsers: [],
   properties: [],
   filteredProperties: [],
+  units: [],
+  filteredUnits: [],
   loading: false,
   searchTerm: "",
   roleFilter: "",
   ownerFilter: "",
+  statusFilter: "",
   error: null,
 };
 
@@ -41,6 +47,12 @@ const adminSlice = createSlice({
     setFilteredProperties: (state, action: PayloadAction<Property[]>) => {
       state.filteredProperties = action.payload;
     },
+    setUnits: (state, action: PayloadAction<Unit[]>) => {
+      state.units = action.payload;
+    },
+    setFilteredUnits: (state, action: PayloadAction<Unit[]>) => {
+      state.filteredUnits = action.payload;
+    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
@@ -53,6 +65,9 @@ const adminSlice = createSlice({
     setOwnerFilter: (state, action: PayloadAction<string>) => {
       state.ownerFilter = action.payload;
     },
+    setStatusFilter: (state, action: PayloadAction<string>) => {
+      state.statusFilter = action.payload;
+    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
@@ -64,10 +79,13 @@ export const {
   setFilteredUsers,
   setProperties,
   setFilteredProperties,
+  setUnits,
+  setFilteredUnits,
   setLoading,
   setSearchTerm,
   setRoleFilter,
   setOwnerFilter,
+  setStatusFilter,
   setError,
 } = adminSlice.actions;
 

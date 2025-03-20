@@ -39,7 +39,7 @@ const TableSearchAndFilter: React.FC<TableSearchAndFilterProps> = ({
           value={roleFilter}
           onChange={handleRoleFilterChange}
         >
-          <option value="">Select {FilterTitle}</option>
+          <option value="">All {FilterTitle}</option>
           {roles
             .filter((role) => role !== "")
             .map((role) => (

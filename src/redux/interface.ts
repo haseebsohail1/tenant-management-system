@@ -27,3 +27,15 @@ export interface Property {
   landlordId: any;
   managerId: any;
 }
+
+export interface Unit {
+  _id: any;
+  propertyId: any;
+  unitNumber: any;
+  size: any;
+  availableDate: any;
+  status: any;
+  unitType: any;
+  rentAmount: any;
+  createdAt: any;
+}

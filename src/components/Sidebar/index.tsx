@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
     {
       id: "units",
       label: "Units",
-      href: "/units",
+      href: "/all-units",
       icon: "/svgs/unit-icon.svg",
     },
     {

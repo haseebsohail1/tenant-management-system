@@ -24,7 +24,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
         {onAdd && onAddTitle && (
           <Button
             onClick={onAdd}
-            className="bg-indigo-800 text-white py-2 px-8 rounded-md"
+            className="bg-yellow-600 text-mediumn text-white py-2 px-8 rounded-md"
           >
             {onAddTitle}
           </Button>

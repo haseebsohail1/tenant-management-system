@@ -1,11 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Wrapper from "@/components/Wrapper";
+import UnitsList from "@/Screens/UnitsList";
 
 function Units() {
   return (
     <Wrapper active={"units"}>
-      <h1>Units</h1>
+      <UnitsList />
     </Wrapper>
   );
 }

@@ -30,14 +30,14 @@ const UserTable: React.FC<UserTableProps> = ({
               <th
                 key={col}
                 scope="col"
-                className="px-6 py-5 text-left text-mediumn font-medium text-neutral-300 uppercase tracking-wider"
+                className="px-6 py-5 whitespace-nowrap text-left text-mediumn font-medium text-neutral-300  tracking-wider"
               >
                 {columnTitles[col] || col}
               </th>
             ))}
             <th
               scope="col"
-              className="px-6 py-5 text-right text-mediumn font-medium text-neutral-300 uppercase tracking-wider"
+              className="px-6 py-5 text-right text-mediumn font-medium text-neutral-300 tracking-wider"
             >
               <span className="text-white">Actions</span>
             </th>
@@ -80,7 +80,7 @@ const UserTable: React.FC<UserTableProps> = ({
                   )}
                   {onDelete && (
                     <Button
-                      onClick={() => onDelete(user)}
+                      onClick={() => onDelete(user._id)}
                       className="text-red-600 hover:text-red-500"
                     >
                       <Image

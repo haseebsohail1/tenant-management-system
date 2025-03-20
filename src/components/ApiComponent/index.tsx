@@ -132,3 +132,61 @@ export const GetAdminPropertiesList = async (
     throw error;
   }
 };
+
+export const deleteUserData = async (token: string, userId: string) => {
+  try {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_NEXT_URL}/api/user/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error("Failed to delete User.");
+  }
+};
+
+export const deletePropertyData = async (token: string, propertyId: string) => {
+  try {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_NEXT_URL}/api/property/${propertyId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error("Failed to delete Property.");
+  }
+};
+
+export const deleteUnitData = async (token: string, unitId: string) => {
+  try {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_NEXT_URL}/api/property/${unitId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error("Failed to delete Property.");
+  }
+};
+
+export const GetUnitsList = async (token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/unit`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};
