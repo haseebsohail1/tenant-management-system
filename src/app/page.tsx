@@ -16,7 +16,13 @@ export default function Home() {
         router.push("/dashboard");
         break;
       case "Landlord":
-        router.push("/all-properties");
+        router.push("/properties");
+        break;
+      case "Tenant":
+        router.push("/tenants");
+        break;
+      case "Manager":
+        router.push("/tenants");
         break;
       default:
         null;

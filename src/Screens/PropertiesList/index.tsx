@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import TableList from "@/components/TableList";
 import { useSession } from "next-auth/react";
+import DetailsModalComponent from "@/components/DetailsModalComponent";
 import {
   GetPropertiesList,
   deletePropertyData,
+  AddProperty,
+  GetUserList,
 } from "@/components/ApiComponent";
 import TableHeader from "@/components/TableHeader";
 import TableSearchAndFilter from "@/components/SearchFilters";
@@ -23,20 +26,54 @@ import {
 const AdminPropertiesList: React.FC = () => {
   const { data: session } = useSession();
   const dispatch = useAppDispatch();
-  const { properties, filteredProperties, loading, searchTerm, ownerFilter } =
-    useAppSelector((state: RootState) => state.admin);
+  const {
+    users,
+    properties,
+    filteredProperties,
+    loading,
+    searchTerm,
+    ownerFilter,
+  } = useAppSelector((state: RootState) => state.admin);
 
   const [availableOwnerNames, setAvailableOwnerNames] = useState<string[]>([]);
   const [availablePropertiesList, setAvailablePropertiesList] = useState(false);
+  const [managersList, setManagersList] = useState<
+    { id: string; name: string }[]
+  >([]);
 
-  const columnOrder = ["name", "owner", "manager", "address", "createdAt"];
+  const columnOrder = [
+    "name",
+    "landlordId",
+    "managerId",
+    "address",
+    "createdAt",
+  ];
   const columnTitles = {
     name: "Name",
-    owner: "Owner",
-    manager: "Manager",
+    landlordId: "Owner",
+    managerId: "Manager",
     address: "Address",
     createdAt: "Created At",
   };
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        if (session?.token) {
+          const response = await GetUserList("Manager", session?.token);
+          if (response?.data?.result?.data) {
+            const managers = response.data.result.data.map((user: any) => ({
+              id: user._id,
+              name: user.name,
+            }));
+            setManagersList(managers);
+          }
+        }
+      } finally {
+      }
+    };
+    fetchUsers();
+  }, [session]);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -44,25 +81,17 @@ const AdminPropertiesList: React.FC = () => {
       try {
         if (session?.token) {
           const LandloardId = session?.user?.id;
-          console.log(LandloardId);
           let response;
-
           if (session?.user?.role == "Landlord") {
             response = await GetPropertiesList(LandloardId, session?.token);
           } else {
             response = await GetPropertiesList("", session?.token);
           }
-
-          console.log(response);
           if (response?.data?.result?.data?.length > 0) {
             const mappedProperties = response.data.result.data.map(
               (property: any) => {
                 return {
                   ...property,
-                  owner: property.landlordId?.name || "",
-                  manager: property.managerId?.name || "",
-                  landlordId: property.landlordId,
-                  managerId: property.managerId,
                 };
               }
             );
@@ -82,11 +111,11 @@ const AdminPropertiesList: React.FC = () => {
   }, [session, dispatch]);
 
   useEffect(() => {
-    const uniqueOwnersSet: Set<string> = new Set(
-      properties.map((property: any) => property.owner)
+    const uniqueMangersSet: Set<string> = new Set(
+      properties.map((property: any) => property.name)
     );
-    const uniqueOwnersArray = Array.from(uniqueOwnersSet);
-    setAvailableOwnerNames(uniqueOwnersArray);
+    const uniqueManagersArray = Array.from(uniqueMangersSet);
+    setAvailableOwnerNames(uniqueManagersArray);
   }, [properties]);
 
   useEffect(() => {
@@ -94,15 +123,13 @@ const AdminPropertiesList: React.FC = () => {
 
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (property) =>
-          property.name.toLowerCase().includes(lowerSearchTerm) ||
-          property.address.toLowerCase().includes(lowerSearchTerm)
+      filtered = filtered.filter((property) =>
+        property.address.toLowerCase().includes(lowerSearchTerm)
       );
     }
 
     if (ownerFilter) {
-      filtered = filtered.filter((property) => property.owner === ownerFilter);
+      filtered = filtered.filter((property) => property.name === ownerFilter);
     }
 
     dispatch(setFilteredProperties(filtered));
@@ -144,24 +171,89 @@ const AdminPropertiesList: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleAddClick = () => {
+    if (session?.user?.role !== "Landlord") {
+      toast.error("Only Landlords can add properties.");
+      return;
+    }
     setIsAddModalOpen(true);
+  };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLandlord, setSelectedLandlord] = useState(null);
+  const [selectedManager, setSelectedManager] = useState(null);
+
+  const handleLanlordClick = (landlord: any) => {
+    setSelectedLandlord(landlord);
+    setIsModalOpen(true);
+  };
+
+  const handleManagerClick = (unit: any) => {
+    setSelectedManager(unit);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedLandlord(null);
+    setSelectedManager(null);
+  };
+
+  const inputLabels: Record<string, { label: string; type: "text" }> = {
+    name: { label: "Full Name", type: "text" },
+    address: { label: "Address", type: "text" },
+    city: { label: "City", type: "text" },
+    country: { label: "Country", type: "text" },
+    state: { label: "State", type: "text" },
+    zipcode: { label: "Zip Code", type: "text" },
+  };
+
+  const selectLabels = {
+    managerId: {
+      label: "Manager",
+      options: managersList.map((manager) => ({
+        label: manager.name,
+        value: manager.id,
+      })),
+    },
   };
 
   const handleAddClose = () => {
     setIsAddModalOpen(false);
   };
 
-  const inputLabels = {
-    name: "Full Name",
-    address: "Address",
-    city: "City",
-    country: "Country",
-    state: "State",
-    zipcode: "zipcode",
-  };
+  const handleAddSave = async (property: any) => {
+    if (!session?.token) {
+      toast.error("Unauthorized: No session token found");
+      return;
+    }
+    if (
+      !property.name ||
+      !property.address ||
+      !property.city ||
+      !property.country ||
+      !property.state ||
+      !property.zipcode ||
+      !property.managerId
+    ) {
+      toast.error("All fields are required!");
+      return;
+    }
 
-  const handleAddSave = (newUser: any) => {
-    handleAddClose();
+    dispatch(setLoading(true));
+    try {
+      const response = await AddProperty(session.token, property);
+      if (response?.data?.result) {
+        const newProperty = response.data.result;
+        dispatch(setProperties([...properties, newProperty]));
+        dispatch(setFilteredProperties([...filteredProperties, newProperty]));
+        toast.success("Property added successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to add user");
+    } finally {
+      dispatch(setLoading(false));
+      handleAddClose();
+    }
   };
 
   return (
@@ -174,12 +266,15 @@ const AdminPropertiesList: React.FC = () => {
             onAdd={handleAddClick}
             onAddTitle="Add Property"
           />
+
           <ModalComponent
             isOpen={isAddModalOpen}
             onClose={handleAddClose}
             onSave={handleAddSave}
             headingText="Add Properites"
             inputLabels={inputLabels}
+            selectLabels={selectLabels}
+            loading={loading}
           />
         </>
       ) : (
@@ -188,6 +283,12 @@ const AdminPropertiesList: React.FC = () => {
           description="A list of registered Properties."
         />
       )}
+      <DetailsModalComponent
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        landlord={selectedLandlord}
+        manager={selectedManager}
+      />
       {availablePropertiesList ? (
         <div className="p-5 text-gray-400">
           Properties List is not available
@@ -200,15 +301,41 @@ const AdminPropertiesList: React.FC = () => {
             roleFilter={ownerFilter}
             setRoleFilter={(filter) => dispatch(setOwnerFilter(filter))}
             roles={availableOwnerNames}
-            FilterTitle="Owner"
-            SearchTitle="name and address"
+            FilterTitle="Name"
+            SearchTitle="address"
           />
           <TableList
-            users={loading ? [] : filteredProperties}
+            users={
+              loading
+                ? []
+                : filteredProperties.map((property) => ({
+                    ...property,
+                    landlordId: (
+                      <span
+                        className="underline cursor-pointer"
+                        onClick={() => handleLanlordClick(property.landlordId)}
+                      >
+                        {property.landlordId ? "Owner Detail" : ""}
+                      </span>
+                    ),
+                    managerId: (
+                      <span
+                        className="underline cursor-pointer"
+                        onClick={() => handleManagerClick(property.managerId)}
+                      >
+                        {property.managerId ? "Manger Detail" : ""}
+                      </span>
+                    ),
+                  }))
+            }
             columnOrder={columnOrder}
             columnTitles={columnTitles}
             loading={loading}
-            onDelete={handleDeleteProperty}
+            onDelete={
+              session?.user?.role === "Landlord"
+                ? handleDeleteProperty
+                : undefined
+            }
           />
         </>
       )}

@@ -1,8 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../Button/Button";
 import InputField from "@/components/InputField";
+
 interface User {
   [key: string]: string;
+}
+
+interface InputFieldProps {
+  label: string;
+  type?:
+    | "text"
+    | "number"
+    | "email"
+    | "password"
+    | "tel"
+    | "url"
+    | "date"
+    | "datetime-local"
+    | "search"
+    | "textarea"
+    | "time";
 }
 
 interface AddUserModalProps {
@@ -10,7 +27,14 @@ interface AddUserModalProps {
   onClose: () => void;
   onSave: (newUser: User) => void;
   headingText: string;
-  inputLabels: { [key: string]: string };
+  inputLabels: { [key: string]: InputFieldProps };
+  loading?: boolean;
+  selectLabels: {
+    [key: string]: {
+      label: string;
+      options: string[] | { label: string; value: string }[];
+    };
+  };
 }
 
 const ModalComponent: React.FC<AddUserModalProps> = ({
@@ -19,16 +43,20 @@ const ModalComponent: React.FC<AddUserModalProps> = ({
   onSave,
   headingText,
   inputLabels,
+  loading,
+  selectLabels = {},
 }) => {
-  const [newUser, setNewUser] = useState<User>({});
+  const [formData, setFormData] = useState<User>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewUser({ ...newUser, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSave = () => {
-    onSave(newUser);
-    onClose();
+    onSave(formData);
+    setFormData({});
   };
 
   if (!isOpen) {
@@ -53,16 +81,39 @@ const ModalComponent: React.FC<AddUserModalProps> = ({
               {headingText}
             </h3>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {Object.entries(inputLabels).map(([key, label]) => (
+              {Object.entries(selectLabels).map(([key, { label, options }]) => (
+                <div key={key} className="flex flex-col justify-end">
+                  <label className="block text-white mb-1">{label}</label>
+                  <select
+                    name={key}
+                    value={formData[key] || ""}
+                    onChange={handleChange}
+                    className="text-sm rounded-md p-3 w-full bg-gray-700 text-white focus:outline-none focus:none"
+                  >
+                    <option value="">Select {label}</option>
+                    {options.map((option: any) => (
+                      <option
+                        key={typeof option === "string" ? option : option.value}
+                        value={
+                          typeof option === "string" ? option : option.value
+                        }
+                      >
+                        {typeof option === "string" ? option : option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+              {Object.entries(inputLabels).map(([key, { label, type }]) => (
                 <div key={key}>
                   <InputField
                     label={label}
                     name={key}
                     required={true}
-                    type="text"
+                    type={type}
                     placeholder={label}
                     onChange={handleChange}
-                    value={newUser[key] || ""}
+                    value={formData[key] || ""}
                   />
                 </div>
               ))}
@@ -71,7 +122,7 @@ const ModalComponent: React.FC<AddUserModalProps> = ({
           <div className="bg-gray-700 px-4 py-3 flex gap-4 flex-row justify-end">
             <Button
               type="button"
-              className="rounded-md shadow-sm px-6 py-2 bg-gray-600 font-medium text-gray-700 hover:bg-gray-500  focus:none text-white"
+              className="rounded-md shadow-sm px-6 py-2 bg-gray-600 font-medium text-gray-700 hover:bg-gray-500 focus:none text-white"
               onClick={onClose}
             >
               Cancel
@@ -80,8 +131,9 @@ const ModalComponent: React.FC<AddUserModalProps> = ({
               type="button"
               className="rounded-md shadow-sm px-8 py-2 bg-yellow-600 text-white font-medium focus:none"
               onClick={handleSave}
+              disabled={loading}
             >
-              Save
+              {loading ? "Processing.." : "Save"}
             </Button>
           </div>
         </div>

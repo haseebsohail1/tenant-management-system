@@ -6,7 +6,7 @@ export interface AuthState {
   email: string | null | undefined;
   token: string | null | undefined;
   user: any;
-  isAuthenticated: boolean; // Boolean to indicate authentication status
+  isAuthenticated: boolean;
 }
 
 export interface User {
@@ -20,8 +20,6 @@ export interface User {
 export interface Property {
   _id: any;
   name: any;
-  owner: any;
-  manager: any;
   address: any;
   createdAt: any;
   landlordId: any;
@@ -37,5 +35,26 @@ export interface Unit {
   status: any;
   unitType: any;
   rentAmount: any;
+  createdAt: any;
+}
+
+export interface Tenant {
+  _id: any;
+  status: any;
+  userId: any;
+  unitId: any;
+  startDate: any;
+  endDate: any;
+  createdAt: any;
+}
+export interface Document {
+  _id: any;
+  status: any;
+  propertyId: any;
+  unitId: any;
+  tenantId: any;
+  startDate: any;
+  endDate: any;
+  monthlyRent: any;
   createdAt: any;
 }

@@ -27,13 +27,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
     {
       id: "properties",
       label: "Properties",
-      href: "/all-properties",
+      href: "/properties",
       icon: "/svgs/propery-icon.svg",
     },
     {
       id: "units",
       label: "Units",
-      href: "/all-units",
+      href: "/units",
       icon: "/svgs/unit-icon.svg",
     },
     {
@@ -43,9 +43,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
       icon: "/svgs/tenant-icon.svg",
     },
     {
-      id: "documents",
-      label: "Documents",
-      href: "/documents",
+      id: "lease-agreement",
+      label: "Lease Agreement",
+      href: "/lease-agreement",
       icon: "/svgs/documents-icon.svg",
     },
     {
@@ -58,10 +58,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
 
   const navItemsTenant: NavItem[] = [
     {
-      id: "dashboard",
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: "/svgs/dashboard-icon.svg",
+      id: "tenants",
+      label: "Tenants",
+      href: "/tenants",
+      icon: "/svgs/tenant-icon.svg",
+    },
+    {
+      id: "lease-agreement",
+      label: "Lease Agreement",
+      href: "/lease-agreement",
+      icon: "/svgs/documents-icon.svg",
+    },
+  ];
+
+  const navItemsManager: NavItem[] = [
+    {
+      id: "tenants",
+      label: "Tenants",
+      href: "/tenants",
+      icon: "/svgs/tenant-icon.svg",
+    },
+    {
+      id: "lease-agreement",
+      label: "Lease Agreement",
+      href: "/lease-agreement",
+      icon: "/svgs/documents-icon.svg",
     },
   ];
 
@@ -81,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
     {
       id: "properties",
       label: "Properties",
-      href: "/all-properties",
+      href: "/properties",
       icon: "/svgs/propery-icon.svg",
     },
   ];
@@ -102,6 +123,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, active }) => {
       break;
     case "Tenant":
       navItems = navItemsTenant;
+      break;
+    case "Manager":
+      navItems = navItemsManager;
       break;
     default:
       null;

@@ -13,7 +13,13 @@ const withAuthProtection = (WrappedComponent: React.FC) => {
           router.replace("/dashboard");
           break;
         case "Landlord":
-          router.replace("/all-properties");
+          router.replace("/properties");
+          break;
+        case "Tenant":
+          router.replace("/tenants");
+          break;
+        case "Manager":
+          router.replace("/tenants");
           break;
         default:
           null;

@@ -22,10 +22,6 @@ const MainLayout: React.FC<LayoutProps> = ({ children, active }) => {
     avatar: session?.user?.image || "/svgs/user-profile.png",
   };
 
-  useEffect(() => {
-    console.log("Session User:", session?.user);
-  }, [session]);
-
   const contentAreaClasses = `p-2 lg:p-5 overflow-y-auto bg-gray-700 transition-all w-full lg:ml-64 lg:w-[calc(100% - 16rem)]`;
 
   return (

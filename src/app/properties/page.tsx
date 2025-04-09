@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Wrapper from "@/components/Wrapper";
-import PropertyList from "@/Screens/PropertyList";
+import PropertiesList from "@/Screens/PropertiesList";
 
 function Properties() {
   return (
     <Wrapper active={"properties"}>
-      <PropertyList />
+      <PropertiesList />
     </Wrapper>
   );
 }

@@ -75,7 +75,6 @@ const PropertyList: React.FC = () => {
   };
 
   const handleDeleteUser = (user: User) => {
-    console.log("Deleting user:", user);
     setUsers(users.filter((u) => u.id !== user.id));
   };
 

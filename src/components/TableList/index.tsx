@@ -35,12 +35,14 @@ const UserTable: React.FC<UserTableProps> = ({
                 {columnTitles[col] || col}
               </th>
             ))}
-            <th
-              scope="col"
-              className="px-6 py-5 text-right text-mediumn font-medium text-neutral-300 tracking-wider"
-            >
-              <span className="text-white">Actions</span>
-            </th>
+            {(onDelete || onEdit) && (
+              <th
+                scope="col"
+                className="px-6 py-5 text-right text-mediumn font-medium text-neutral-300 tracking-wider"
+              >
+                <span className="text-white">Actions</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="bg-gray-800 divide-y divide-gray-700">

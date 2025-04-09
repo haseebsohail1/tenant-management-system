@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User, Property, Unit } from "./interface";
+import { User, Property, Unit, Tenant, Document } from "./interface";
 
 interface AdminState {
   users: User[];
@@ -8,6 +8,10 @@ interface AdminState {
   filteredProperties: Property[];
   units: Unit[];
   filteredUnits: Unit[];
+  tenants: Tenant[];
+  filteredTenants: Tenant[];
+  documents: Document[];
+  filteredDocuments: Document[];
   loading: boolean;
   searchTerm: string;
   roleFilter: string;
@@ -23,6 +27,10 @@ const initialState: AdminState = {
   filteredProperties: [],
   units: [],
   filteredUnits: [],
+  tenants: [],
+  filteredTenants: [],
+  documents: [],
+  filteredDocuments: [],
   loading: false,
   searchTerm: "",
   roleFilter: "",
@@ -53,6 +61,18 @@ const adminSlice = createSlice({
     setFilteredUnits: (state, action: PayloadAction<Unit[]>) => {
       state.filteredUnits = action.payload;
     },
+    setTenants: (state, action: PayloadAction<Tenant[]>) => {
+      state.tenants = action.payload;
+    },
+    setFilteredTenants: (state, action: PayloadAction<Tenant[]>) => {
+      state.filteredTenants = action.payload;
+    },
+    setDocuments: (state, action: PayloadAction<Document[]>) => {
+      state.documents = action.payload;
+    },
+    setFilteredDocuments: (state, action: PayloadAction<Document[]>) => {
+      state.filteredDocuments = action.payload;
+    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
@@ -81,6 +101,10 @@ export const {
   setFilteredProperties,
   setUnits,
   setFilteredUnits,
+  setTenants,
+  setFilteredTenants,
+  setDocuments,
+  setFilteredDocuments,
   setLoading,
   setSearchTerm,
   setRoleFilter,

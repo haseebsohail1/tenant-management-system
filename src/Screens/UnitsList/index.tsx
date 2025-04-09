@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import TableList from "@/components/TableList";
 import { useSession } from "next-auth/react";
-import { GetUnitsList, deleteUnitData } from "@/components/ApiComponent";
+import {
+  GetUnitsList,
+  deleteUnitData,
+  AddUnits,
+} from "@/components/ApiComponent";
 import TableHeader from "@/components/TableHeader";
 import TableSearchAndFilter from "@/components/SearchFilters";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -9,6 +13,7 @@ import { RootState } from "@/redux/store";
 import ModalComponent from "@/components/ModalComponent";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 import {
   setUnits,
   setFilteredUnits,
@@ -20,16 +25,22 @@ import {
 const UnitsList: React.FC = () => {
   const { data: session } = useSession();
   const dispatch = useAppDispatch();
-  const { units, filteredUnits, loading, searchTerm, statusFilter } =
-    useAppSelector((state: RootState) => state.admin);
+  const {
+    properties,
+    units,
+    filteredUnits,
+    loading,
+    searchTerm,
+    statusFilter,
+  } = useAppSelector((state: RootState) => state.admin);
   const [availableUnitsList, setAvailableUnitsList] = useState(false);
   const [availableStatusNames, setAvailableStatusNames] = useState<string[]>(
     []
   );
 
   const columnOrder = [
-    "unitNumber",
     "propertyId",
+    "unitNumber",
     "size",
     "status",
     "unitType",
@@ -38,8 +49,8 @@ const UnitsList: React.FC = () => {
     "createdAt",
   ];
   const columnTitles = {
+    propertyId: "Property Name",
     unitNumber: "Unit Number",
-    propertyId: "Property Id",
     size: "Size",
     status: "Status",
     unitType: "Unit Type",
@@ -53,26 +64,51 @@ const UnitsList: React.FC = () => {
       dispatch(setLoading(true));
       try {
         if (session?.token) {
-          const response = await GetUnitsList(session?.token);
-          console.log("unit", response);
+          const response = await GetUnitsList(session.token);
+
           if (response?.data?.result?.length > 0) {
-            dispatch(setUnits(response.data.result));
-            setAvailableUnitsList(false);
+            const filteredUnits = response.data.result
+              .filter((unit: any) =>
+                properties.some((property) => unit.propertyId === property._id)
+              )
+              .map((unit: any) => {
+                const property = properties.find(
+                  (property) => property._id === unit.propertyId
+                );
+                return {
+                  ...unit,
+                  propertyId: property ? property.name : "",
+                  availableDate: format(
+                    new Date(unit.availableDate),
+                    "MM-dd-yyyy"
+                  ),
+                };
+              });
+
+            if (filteredUnits.length > 0) {
+              dispatch(setUnits(filteredUnits));
+              setAvailableUnitsList(false);
+            } else {
+              dispatch(setUnits([]));
+              setAvailableUnitsList(true);
+            }
           } else {
             dispatch(setUnits([]));
             setAvailableUnitsList(true);
           }
         }
-      } catch (error) {
-        console.error("Error fetching units:", error);
-        toast.error("Failed to fetch units.");
       } finally {
         dispatch(setLoading(false));
       }
     };
 
-    fetchUnits();
-  }, [session, dispatch]);
+    if (properties.length > 0) {
+      fetchUnits();
+    } else {
+      dispatch(setUnits([]));
+      setAvailableUnitsList(true);
+    }
+  }, [session, dispatch, properties]);
 
   useEffect(() => {
     const uniqueOwnersSet: Set<string> = new Set(
@@ -135,29 +171,69 @@ const UnitsList: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
+  const inputLabels: Record<
+    string,
+    { label: string; type: "text" | "number" | "date" }
+  > = {
+    unitNumber: { label: "Unit Number", type: "text" },
+    size: { label: "Size", type: "number" },
+    rentAmount: { label: "Rent Amount", type: "number" },
+    availableDate: { label: "Available Date", type: "date" },
+  };
+
+  const selectLabels = {
+    unitType: {
+      label: "Unit Type",
+      options: [
+        { label: "Apartment", value: "Apartment" },
+        { label: "Office", value: "Office" },
+        { label: "Shop", value: "Shop" },
+        { label: "Studio", value: "Studio" },
+      ],
+    },
+    propertyId: {
+      label: "Property Name",
+      options: properties.map((p) => ({
+        label: p.name,
+        value: p._id,
+      })),
+    },
+  };
+
   const handleAddClose = () => {
     setIsAddModalOpen(false);
   };
 
-  const inputLabels = {
-    name: "Full Name",
-    address: "Address",
-    city: "City",
-    country: "Country",
-    state: "State",
-    zipcode: "zipcode",
-  };
-
-  const handleAddSave = (newUser: any) => {
-    handleAddClose();
-    // Implement the logic to add the new unit using your API
-    // For example:
-    // addNewUnit(session.token, newUser).then(response => {
-    //   dispatch(setUnits([...units, response.data]));
-    //   toast.success("Unit Added Successfully!");
-    // }).catch(error => {
-    //   toast.error("Failed to add unit.");
-    // })
+  const handleAddSave = async (unit: any) => {
+    if (!session?.token) {
+      toast.error("Unauthorized: No session token found");
+      return;
+    }
+    if (
+      !unit.unitType ||
+      !unit.unitNumber ||
+      !unit.size ||
+      !unit.rentAmount ||
+      !unit.availableDate ||
+      !unit.propertyId
+    ) {
+      toast.error("All fields are required!");
+      return;
+    }
+    dispatch(setLoading(true));
+    try {
+      const response = await AddUnits(session.token, unit);
+      if (response?.data?.result) {
+        dispatch(setUnits([...units, response.data.result]));
+        dispatch(setFilteredUnits([...filteredUnits, response.data.result]));
+        toast.success("Unit added successfully");
+      }
+    } catch (error) {
+      error;
+    } finally {
+      dispatch(setLoading(false));
+      handleAddClose();
+    }
   };
 
   return (
@@ -173,8 +249,11 @@ const UnitsList: React.FC = () => {
         onClose={handleAddClose}
         onSave={handleAddSave}
         headingText="Add Units"
+        selectLabels={selectLabels}
         inputLabels={inputLabels}
+        loading={loading}
       />
+
       {availableUnitsList ? (
         <div className="p-5 text-gray-400">Units List is not available</div>
       ) : (
@@ -184,7 +263,7 @@ const UnitsList: React.FC = () => {
             setSearchTerm={(term) => dispatch(setSearchTerm(term))}
             roleFilter={statusFilter}
             setRoleFilter={(filter) => dispatch(setStatusFilter(filter))}
-            roles={availableStatusNames} // Use the dynamically fetched status options
+            roles={availableStatusNames}
             FilterTitle="Status"
             SearchTitle="size"
           />
