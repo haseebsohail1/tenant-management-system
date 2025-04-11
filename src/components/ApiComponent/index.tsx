@@ -321,6 +321,63 @@ export const updateUsers = async (
     );
     return response;
   } catch (error) {
-    throw new Error("Failed to update Status.");
+    throw new Error("Failed to update User Data.");
+  }
+};
+
+export const updateProperties = async (
+  token: string,
+  propertyId: string,
+  formData: any
+) => {
+  try {
+    const response = await axios.patch(
+      `${BASE_URL}/api/property/${propertyId}`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw new Error("Failed to update Property Data.");
+  }
+};
+
+export const updateUnits = async (
+  token: string,
+  unitId: string,
+  formData: any
+) => {
+  try {
+    const response = await axios.patch(
+      `${BASE_URL}/api/unit/${unitId}`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw new Error("Failed to update Units Data.");
+  }
+};
+
+export const uploadDocument = async (
+  token: string,
+  documentId: string,
+  formData: any
+) => {
+  try {
+    const response = await axios.patch(
+      `${BASE_URL}/api/lease/upload-file/${documentId}`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw new Error("Failed to update Units Data.");
   }
 };

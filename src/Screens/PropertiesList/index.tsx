@@ -7,6 +7,7 @@ import {
   deletePropertyData,
   AddProperty,
   GetUserList,
+  updateProperties,
 } from "@/components/ApiComponent";
 import TableHeader from "@/components/TableHeader";
 import TableSearchAndFilter from "@/components/SearchFilters";
@@ -15,6 +16,7 @@ import { RootState } from "@/redux/store";
 import ModalComponent from "@/components/ModalComponent";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
+import EditModalComponent from "@/components/EditModalComponent";
 import {
   setProperties,
   setFilteredProperties,
@@ -92,6 +94,11 @@ const AdminPropertiesList: React.FC = () => {
               (property: any) => {
                 return {
                   ...property,
+                  address: `${property.address || ""}, ${
+                    property.city || ""
+                  }, ${property.state || ""}, ${property.country || ""} - ${
+                    property.zipcode || ""
+                  }`,
                 };
               }
             );
@@ -256,31 +263,74 @@ const AdminPropertiesList: React.FC = () => {
     }
   };
 
+  // State for managing edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+
+  const handleEditClick = (user: any) => {
+    setSelectedProperty(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedProperty(null);
+  };
+
+  const handleEditSave = async (updatedData: any) => {
+    if (!session?.token || !selectedProperty?._id) {
+      toast.error("Unauthorized or no user selected");
+      return;
+    }
+
+    const data = {
+      name: updatedData.name ?? selectedProperty.name,
+    };
+
+    dispatch(setLoading(true));
+    try {
+      const response = await updateProperties(
+        session.token,
+        selectedProperty._id,
+        data
+      );
+      if (response?.data?.result) {
+        const updatedProperties = properties.map((property) =>
+          property._id === selectedProperty._id
+            ? { ...property, ...updatedData }
+            : property
+        );
+        dispatch(setProperties(updatedProperties));
+        dispatch(setFilteredProperties(updatedProperties));
+        toast.success("Property updated successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to update Property");
+    } finally {
+      dispatch(setLoading(false));
+      handleEditClose();
+    }
+  };
+
   return (
     <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
-      {session?.user?.role == "Landlord" ? (
-        <>
-          <TableHeader
-            title="All Properties List"
-            description="A list of registered Properties."
-            onAdd={handleAddClick}
-            onAddTitle="Add Property"
-          />
-
-          <ModalComponent
-            isOpen={isAddModalOpen}
-            onClose={handleAddClose}
-            onSave={handleAddSave}
-            headingText="Add Properites"
-            inputLabels={inputLabels}
-            selectLabels={selectLabels}
-            loading={loading}
-          />
-        </>
-      ) : (
-        <TableHeader
-          title="All Properties List"
-          description="A list of registered Properties."
+      <TableHeader
+        title="All Properties List"
+        description="A list of registered Properties."
+        onAdd={session?.user?.role === "Landlord" ? handleAddClick : undefined}
+        onAddTitle={
+          session?.user?.role === "Landlord" ? "Add Property" : undefined
+        }
+      />
+      {session?.user?.role === "Landlord" && (
+        <ModalComponent
+          isOpen={isAddModalOpen}
+          onClose={handleAddClose}
+          onSave={handleAddSave}
+          headingText="Add Properites"
+          inputLabels={inputLabels}
+          selectLabels={selectLabels}
+          loading={loading}
         />
       )}
       <DetailsModalComponent
@@ -288,6 +338,21 @@ const AdminPropertiesList: React.FC = () => {
         onClose={handleModalClose}
         landlord={selectedLandlord}
         manager={selectedManager}
+      />
+
+      <EditModalComponent
+        isOpen={isEditModalOpen}
+        onClose={handleEditClose}
+        onUpdate={handleEditSave}
+        headingText="Edit User"
+        inputLabels={{
+          name: { label: "Property Name", type: "text" },
+        }}
+        loading={loading}
+        selectLabels={{}}
+        initialData={{
+          name: selectedProperty?.name,
+        }}
       />
       {availablePropertiesList ? (
         <div className="p-5 text-gray-400">
@@ -335,6 +400,9 @@ const AdminPropertiesList: React.FC = () => {
               session?.user?.role === "Landlord"
                 ? handleDeleteProperty
                 : undefined
+            }
+            onEdit={
+              session?.user?.role === "Landlord" ? handleEditClick : undefined
             }
           />
         </>

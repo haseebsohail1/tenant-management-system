@@ -80,22 +80,20 @@ const EditModalComponent: React.FC<EditModalComponentProps> = ({
         >
           ​
         </span>
-        <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left shadow-xl transform transition-all sm:align-middle w-full max-w-md">
-          <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <h3 className="text-lg font-medium text-white mb-4">
+        <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all my-5 sm:align-middle lg:w-[700px] w-full">
+          <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-3 sm:pb-4">
+            <h3 className="text-lg leading-6 font-medium text-white">
               {headingText}
             </h3>
-            <div className="space-y-4">
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {Object.entries(selectLabels).map(([key, { label, options }]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    {label}
-                  </label>
+                <div key={key} className="flex flex-col justify-end">
+                  <label className="block text-white mb-1">{label}</label>
                   <select
                     name={key}
                     value={formData[key] || ""}
                     onChange={handleChange}
-                    className="text-sm rounded-md cursor-pointer p-3 w-full bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    className="text-sm rounded-md p-3 w-full bg-gray-700 text-white focus:outline-none focus:none"
                   >
                     <option value="" disabled>
                       Select {label}

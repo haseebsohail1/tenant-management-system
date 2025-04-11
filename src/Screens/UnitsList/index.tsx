@@ -5,6 +5,7 @@ import {
   GetUnitsList,
   deleteUnitData,
   AddUnits,
+  updateUnits,
 } from "@/components/ApiComponent";
 import TableHeader from "@/components/TableHeader";
 import TableSearchAndFilter from "@/components/SearchFilters";
@@ -14,6 +15,7 @@ import ModalComponent from "@/components/ModalComponent";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
+import EditModalComponent from "@/components/EditModalComponent";
 import {
   setUnits,
   setFilteredUnits,
@@ -236,6 +238,49 @@ const UnitsList: React.FC = () => {
     }
   };
 
+  // State for managing edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<any>(null);
+
+  const handleEditClick = (user: any) => {
+    setSelectedUnit(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedUnit(null);
+  };
+
+  const handleEditSave = async (updatedData: any) => {
+    if (!session?.token || !selectedUnit?._id) {
+      toast.error("Unauthorized or no user selected");
+      return;
+    }
+
+    const data = {
+      size: updatedData.size ?? selectedUnit.size,
+    };
+
+    dispatch(setLoading(true));
+    try {
+      const response = await updateUnits(session.token, selectedUnit._id, data);
+      if (response?.data?.result) {
+        const updatedUnits = units.map((unit) =>
+          unit._id === selectedUnit._id ? { ...unit, ...updatedData } : unit
+        );
+        dispatch(setUnits(updatedUnits));
+        dispatch(setFilteredUnits(updatedUnits));
+        toast.success("Unit updated successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to update Unit");
+    } finally {
+      dispatch(setLoading(false));
+      handleEditClose();
+    }
+  };
+
   return (
     <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
       <TableHeader
@@ -252,6 +297,21 @@ const UnitsList: React.FC = () => {
         selectLabels={selectLabels}
         inputLabels={inputLabels}
         loading={loading}
+      />
+
+      <EditModalComponent
+        isOpen={isEditModalOpen}
+        onClose={handleEditClose}
+        onUpdate={handleEditSave}
+        headingText="Edit User"
+        inputLabels={{
+          size: { label: "Size", type: "text" },
+        }}
+        loading={loading}
+        selectLabels={{}}
+        initialData={{
+          size: selectedUnit?.size,
+        }}
       />
 
       {availableUnitsList ? (
@@ -273,6 +333,7 @@ const UnitsList: React.FC = () => {
             columnTitles={columnTitles}
             loading={loading}
             onDelete={handleDeleteProperty}
+            onEdit={handleEditClick}
           />
         </>
       )}

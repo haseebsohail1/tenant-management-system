@@ -11,6 +11,7 @@ interface UserTableProps {
   loading?: boolean;
   onEdit?: (user: any) => void;
   onDelete?: (user: any) => void;
+  onUpload?: (user: any) => void;
 }
 
 const UserTable: React.FC<UserTableProps> = ({
@@ -20,6 +21,7 @@ const UserTable: React.FC<UserTableProps> = ({
   loading,
   onEdit,
   onDelete,
+  onUpload,
 }) => {
   return (
     <div className="overflow-auto">
@@ -35,7 +37,7 @@ const UserTable: React.FC<UserTableProps> = ({
                 {columnTitles[col] || col}
               </th>
             ))}
-            {(onDelete || onEdit) && (
+            {(onDelete || onEdit || onUpload) && (
               <th
                 scope="col"
                 className="px-6 py-5 text-right text-mediumn font-medium text-neutral-300 tracking-wider"
@@ -67,6 +69,19 @@ const UserTable: React.FC<UserTableProps> = ({
                   </td>
                 ))}
                 <td className="px-6 py-4 flex justify-end flex-row gap-2 text-right text-sm font-medium">
+                  {onUpload && (
+                    <Button
+                      onClick={() => onUpload(user)}
+                      className="text-indigo-600 hover:text-indigo-500"
+                    >
+                      <Image
+                        src="/svgs/edit.svg"
+                        alt="Logo"
+                        height={20}
+                        width={20}
+                      />
+                    </Button>
+                  )}
                   {onEdit && (
                     <Button
                       onClick={() => onEdit(user)}

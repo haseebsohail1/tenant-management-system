@@ -2,7 +2,17 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Button from "../../components/Button/Button";
 import InputField from "@/components/InputField";
-import { useSession } from "next-auth/react";
+import { useSession, getSession } from "next-auth/react";
+import { updateUsers } from "@/components/ApiComponent";
+import toast from "react-hot-toast";
+import { RootState } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import {
+  setUsers,
+  setFilteredUsers,
+  setLoading,
+  setCurrentUser,
+} from "@/redux/adminSlice";
 
 interface ProfileProps {}
 
@@ -15,6 +25,10 @@ interface UserData {
 
 const Profile: React.FC<ProfileProps> = () => {
   const { data: session, status } = useSession();
+  const dispatch = useAppDispatch();
+  const { users, loading, currentUser } = useAppSelector(
+    (state: RootState) => state.admin
+  );
 
   const [userData, setUserData] = useState<UserData>({
     fullName: "",
@@ -24,7 +38,14 @@ const Profile: React.FC<ProfileProps> = () => {
   });
 
   useEffect(() => {
-    if (session?.user) {
+    if (currentUser) {
+      setUserData({
+        fullName: currentUser.name || "",
+        phone: currentUser.phone || "",
+        role: session?.user?.role || "",
+        email: session?.user?.email || "",
+      });
+    } else if (session?.user) {
       setUserData({
         fullName: session.user.name || "",
         phone: session.user.phone || "",
@@ -32,20 +53,61 @@ const Profile: React.FC<ProfileProps> = () => {
         email: session.user.email || "",
       });
     }
-  }, [session]);
+  }, [session, currentUser]);
 
   const userInitial = userData?.fullName?.charAt(0).toUpperCase() || "";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setUserData((prevData) => ({
-      ...prevData,
+    setUserData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("Updating profile with data:", userData);
+  const handleSubmit = async () => {
+    const userId = session?.user?.id;
+    const token = (session as any)?.token;
+
+    if (!userId || !token) {
+      toast.error("User ID or token missing from session");
+      return;
+    }
+
+    const updatedData = {
+      name: userData.fullName,
+      phone: userData.phone,
+    };
+
+    dispatch(setLoading(true));
+    try {
+      const res = await updateUsers(token, userId, updatedData);
+
+      if (res?.data?.result) {
+        const updatedUsers = users.map((user) =>
+          String(user._id) === String(userId)
+            ? { ...user, name: updatedData.name, phone: updatedData.phone }
+            : user
+        );
+        dispatch(setUsers(updatedUsers));
+        dispatch(setFilteredUsers(updatedUsers));
+
+        dispatch(
+          setCurrentUser({
+            ...currentUser,
+            ...updatedData,
+          })
+        );
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error("Update failed");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("An error occurred while updating");
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
@@ -61,72 +123,59 @@ const Profile: React.FC<ProfileProps> = () => {
         </div>
         <div className="lg:col-span-2">
           <div className="flex items-center mb-6">
-            {userData.fullName ? (
-              <div className="flex w-20 h-20 text-[35px] items-center mr-4 justify-center rounded-full bg-gray-500 text-white font-bold">
-                {userInitial}
-              </div>
-            ) : (
-              <Image
-                src="/svgs/user-profile.png"
-                alt="Profile Avatar"
-                className="w-20 h-20 rounded-full mr-4"
-                width={30}
-                height={30}
-              />
-            )}
+            <div className="flex w-20 h-20 text-[35px] items-center mr-4 justify-center rounded-full bg-gray-500 text-white font-bold">
+              {userInitial}
+            </div>
             <div className="flex flex-col gap-0">
-              <h6 className="m-0 p-0 text-lg font-medium text-white">
+              <h6 className="text-lg font-medium text-white">
                 {userData.fullName}
               </h6>
-              <p className="m-0 p-0 text-sm font-medium text-white">
-                {userData.role}
-              </p>
+              <p className="text-sm font-medium text-white">{userData.role}</p>
             </div>
           </div>
+
           <div className="grid grid-cols-1 gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
               <InputField
-                label="First Name"
+                label="Full Name"
                 type="text"
-                name="firstName" // Use name!
+                name="fullName"
                 placeholder="John"
                 value={userData.fullName}
                 onChange={handleChange}
-                required={true}
+                required
               />
               <InputField
                 label="Phone"
                 type="number"
-                name="phone" // Use name!
+                name="phone"
                 placeholder="Phone"
                 value={userData.phone}
                 onChange={handleChange}
-                required={true}
+                required
               />
             </div>
 
-            {/* Role Field */}
             <InputField
               label="Role"
               type="text"
-              name="role" // Use name!
+              name="role"
               placeholder="Tenant"
               value={userData.role}
               onChange={handleChange}
-              required={true}
-              disabled={true}
+              required
+              disabled
             />
 
-            {/* Email Field */}
             <InputField
               label="Email Address"
               type="email"
-              name="email" // Use name!
+              name="email"
               placeholder="john.doe@example.com"
               value={userData.email}
               onChange={handleChange}
-              required={true}
-              disabled={true}
+              required
+              disabled
             />
           </div>
 
@@ -135,7 +184,7 @@ const Profile: React.FC<ProfileProps> = () => {
               className="bg-indigo-800 text-white py-2 px-4 rounded-md hover:bg-blue-700"
               onClick={handleSubmit}
             >
-              Update Profile
+              {loading ? "Updating....." : "Update Profile"}
             </Button>
           </div>
         </div>

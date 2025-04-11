@@ -18,6 +18,7 @@ interface AdminState {
   ownerFilter: string;
   statusFilter: string;
   error: string | null;
+  currentUser: User | null;
 }
 
 const initialState: AdminState = {
@@ -37,6 +38,7 @@ const initialState: AdminState = {
   ownerFilter: "",
   statusFilter: "",
   error: null,
+  currentUser: null,
 };
 
 const adminSlice = createSlice({
@@ -91,6 +93,9 @@ const adminSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
   },
 });
 
@@ -111,6 +116,7 @@ export const {
   setOwnerFilter,
   setStatusFilter,
   setError,
+  setCurrentUser,
 } = adminSlice.actions;
 
 export const adminReducer = adminSlice.reducer;

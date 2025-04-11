@@ -12,6 +12,7 @@ export interface AuthState {
 export interface User {
   _id: any;
   name: string;
+  phone: string;
   email: any;
   role: any;
   createdAt: any;

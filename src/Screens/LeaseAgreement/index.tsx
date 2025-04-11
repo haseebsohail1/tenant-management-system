@@ -4,16 +4,15 @@ import { useSession } from "next-auth/react";
 import {
   deleteDocumentData,
   GetLeaseAgreementList,
-  AddTenants,
   updateDocumentStatus,
+  uploadDocument,
 } from "@/components/ApiComponent";
 import TableHeader from "@/components/TableHeader";
 import TableSearchAndFilter from "@/components/SearchFilters";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
-import ModalComponent from "@/components/ModalComponent";
 import DetailsModalComponent from "@/components/DetailsModalComponent";
-import EditModalComponent from "@/components/EditModalComponent";
+import FileModalComponent from "@/components/FileModelComponent";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import {
@@ -132,7 +131,7 @@ const LeaseAgreementList: React.FC = () => {
     dispatch(setFilteredDocuments(filtered));
   }, [documents, searchTerm, statusFilter, dispatch]);
 
-  const handleDeleteProperty = async (documentId: any) => {
+  const handleDeleteDocument = async (documentId: any) => {
     const result = await Swal.fire({
       title: "Are You Sure",
       text: "Wont be able to Revert",
@@ -155,25 +154,20 @@ const LeaseAgreementList: React.FC = () => {
               documents.filter((document) => document._id !== documentId)
             )
           );
-          toast.success("Tenant Deleted Successfully");
+          toast.success("Lease Agreement Deleted Successfully");
         }
       } catch (error) {
-        console.error("Error deleting Tenant:", error);
-        toast.error("Failed to Delete Tenant");
+        console.error("Error deleting Lease Agreement:", error);
+        toast.error("Failed to Delete Lease Agreement");
       }
     }
   };
 
   //Model Component
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [selectedTenant, setSelectedTenant] = useState(null);
-
-  const handleAddClick = () => {
-    setIsAddModalOpen(true);
-  };
 
   const handlePropertyClick = (property: any) => {
     setSelectedProperty(property);
@@ -197,64 +191,8 @@ const LeaseAgreementList: React.FC = () => {
     setSelectedTenant(null);
   };
 
-  const inputLabels: Record<
-    string,
-    {
-      label: string;
-      type: "date";
-    }
-  > = {
-    startDate: { label: "Start Date", type: "date" },
-    endDate: { label: "End Date", type: "date" },
-  };
-
-  const selectLabels = {
-    unitId: {
-      label: "Unit Number and Type",
-      options: units
-        .filter((unit) => units.some((u) => u._id === unit._id))
-        .map((unit) => ({
-          label: `${unit.unitNumber} - ${unit.unitType}`,
-          value: unit._id,
-        })),
-    },
-  };
-
-  const handleAddClose = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleAddSave = async (unit: any) => {
-    if (!session?.token) {
-      toast.error("Unauthorized: No session token found");
-      return;
-    }
-    if (!unit.startDate || !unit.endDate || !unit.unitId) {
-      toast.error("All fields are required!");
-      return;
-    }
-    dispatch(setLoading(true));
-    try {
-      const response = await AddTenants(session.token, unit);
-      if (response?.data?.result) {
-        dispatch(setDocuments([...tenants, response.data.result]));
-        dispatch(
-          setFilteredDocuments([...filteredDocuments, response.data.result])
-        );
-        toast.success("Tenant added successfully");
-      }
-    } catch (error) {
-      error;
-    } finally {
-      dispatch(setLoading(false));
-      handleAddClose();
-    }
-  };
-
   const isManager = session?.user?.role === "Manager";
-
   const staticStatusOptions = ["Pending", "Active", "Terminated"];
-
   const getStatusBorderColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -313,34 +251,72 @@ const LeaseAgreementList: React.FC = () => {
     }
   };
 
+  // State for managing edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+
+  const handleEditClick = (doc: any) => {
+    setSelectedDocument(doc);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedDocument(null);
+  };
+
+  const handleEditSave = async (updatedData: {
+    name?: string;
+    file?: File | null;
+  }) => {
+    if (!session?.token || !selectedDocument?._id) {
+      toast.error("Unauthorized or no document selected");
+      return;
+    }
+
+    dispatch(setLoading(true));
+    try {
+      const response = await uploadDocument(
+        session.token,
+        selectedDocument._id,
+        updatedData
+      );
+
+      if (response?.data?.result) {
+        const updatedDocuments = documents.map((doc) =>
+          doc._id === selectedDocument._id ? { ...doc, ...updatedData } : doc
+        );
+        dispatch(setDocuments(updatedDocuments));
+        dispatch(setFilteredDocuments(updatedDocuments));
+        toast.success("Document updated successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to update document");
+    } finally {
+      dispatch(setLoading(false));
+      handleEditClose();
+    }
+  };
+
   return (
     <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
       <TableHeader
         title="All Lease Agreement List"
         description="A list of registered Lease Agreements."
-        onAdd={session?.user?.role === "Landlord" ? handleAddClick : undefined}
-        onAddTitle={
-          session?.user?.role === "Landlord" ? "Add Lease Agreement" : undefined
-        }
       />
-      {session?.user?.role === "Landlord" && (
-        <ModalComponent
-          isOpen={isAddModalOpen}
-          onClose={handleAddClose}
-          onSave={handleAddSave}
-          headingText="Add Lease Agreement"
-          selectLabels={selectLabels}
-          inputLabels={inputLabels}
-          loading={loading}
-        />
-      )}
-
       <DetailsModalComponent
         isOpen={isModalOpen}
         onClose={handleModalClose}
         property={selectedProperty}
         unit={selectedUnit}
         tenant={selectedTenant}
+      />
+
+      <FileModalComponent
+        isOpen={isEditModalOpen}
+        onClose={handleEditClose}
+        onSave={handleEditSave}
+        document={selectedDocument}
       />
       {availableDocumentsList ? (
         <div className="p-5 text-gray-400">Documents List is not available</div>
@@ -425,8 +401,11 @@ const LeaseAgreementList: React.FC = () => {
             loading={loading}
             onDelete={
               session?.user?.role === "Landlord"
-                ? handleDeleteProperty
+                ? handleDeleteDocument
                 : undefined
+            }
+            onUpload={
+              session?.user?.role === "Manager" ? handleEditClick : undefined
             }
           />
         </>
