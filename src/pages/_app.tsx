@@ -13,6 +13,7 @@ import { login, logout } from '@/redux/authSlice';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
+      
 
 <Provider store={store}>
         <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
