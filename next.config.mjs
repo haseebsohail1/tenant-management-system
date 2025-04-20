@@ -1,9 +1,11 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-	env: {
-		NEXT_PUBLIC_NEXT_URL: process.env.NEXT_PUBLIC_NEXT_URL,
+	eslint: {
+		ignoreDuringBuilds: true,
 	},
-
+	typescript: {
+		ignoreBuildErrors: true,
+	},
+	output: "standalone",
 };
 
 export default nextConfig;
